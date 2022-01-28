@@ -17,8 +17,8 @@ from .queries import COMP_POSTS_DATA_QUERY
 from .utils import get_today
 
 CACHE_DIR = ".cache"
-LEETCODE_GRAPHQL_URL = "https://leetcode.com/graphql"
 DATA_TYPE = Tuple[List[Dict[str, Union[int, str]]], int, bool]
+LEETCODE_GRAPHQL_URL = "https://leetcode.com/graphql"
 
 # sqlite engine
 engine = create_engine("sqlite:///posts.db")
@@ -87,6 +87,9 @@ def _get_filterted_posts(skip: int = 0, first: int = 15) -> DATA_TYPE:
 
     data, used_cache = _get_all_comp_posts(COMP_POSTS_DATA_QUERY, posts_cache_dir)
     data = data["data"]["categoryTopicList"]
+    if not data or "edges" not in data:
+        logger.warning(f"Missing data for skip {skip}, first {first}")
+        return [], 0, False
     filtered_data = [
         {
             "id": d["node"]["id"],
@@ -102,12 +105,13 @@ def _get_filterted_posts(skip: int = 0, first: int = 15) -> DATA_TYPE:
     return filtered_data, data["totalNum"], used_cache
 
 
-def _is_post_present_already(data: DATA_TYPE, old_posts: Set[str]) -> bool:
-    for d in data:
-        if d["id"] in old_posts:
-            logger.warning(f"Post {d['id']} present already; skipping ...")
-            return True
-    return False
+def _get_new_posts(data: DATA_TYPE, old_posts: Set[str]) -> List[Dict[str, Union[int, str]]]:
+    return [d for d in data if d["id"] not in old_posts]
+
+
+def _update_old_posts(old_posts: Set[str], new_data: DATA_TYPE):
+    for d in new_data:
+        old_posts.add(d["id"])
 
 
 def get_and_save_all_comp_posts() -> None:
@@ -117,26 +121,25 @@ def get_and_save_all_comp_posts() -> None:
     try:
         # fetching the first page separately to get totalNum pages
         data, n_posts, used_cache = _get_filterted_posts(start, stride_size)
-        if _is_post_present_already(data, old_posts):
-            return
-        logger.info(f"Page 0; {len(data)} posts; slept for 0.0s")
+        new_data = _get_new_posts(data, old_posts)
         with session_scope() as session:
-            session.add_all([Posts(**d) for d in data])
+            session.add_all([Posts(**d) for d in new_data])
+            _update_old_posts(old_posts, new_data)
         n_pages = math.ceil(n_posts / stride_size)
         logger.info(f" Found {n_posts} posts({n_pages} pages) ".center(34, "*"))
         # fetching the rest of the pages
         with trange(1, n_pages + 1) as t:
             for page_no in t:
-                sleep_for = 0 if used_cache else random.random() + 2
+                sleep_for = 0 if used_cache else random.random() + 0.5
                 time.sleep(sleep_for)
-                start += stride_size + 1
+                start += stride_size
                 data, _, used_cache = _get_filterted_posts(start, stride_size)
-                if _is_post_present_already(data, old_posts):
-                    return
+                new_data = _get_new_posts(data, old_posts)
+                with session_scope() as session:
+                    session.add_all([Posts(**d) for d in new_data])
+                    _update_old_posts(old_posts, new_data)
                 t.set_description(f"Page {page_no}")
                 t.set_postfix(slept_for=sleep_for)
-                with session_scope() as session:
-                    session.add_all([Posts(**d) for d in data])
     except KeyboardInterrupt:
         session.commit()
         session.close()
