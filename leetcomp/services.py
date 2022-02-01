@@ -1,4 +1,3 @@
-from importlib.metadata import requires
 import json
 import math
 import os
