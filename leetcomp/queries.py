@@ -91,3 +91,75 @@ COMP_POSTS_DATA_QUERY = {
         "categories": ["compensation"],
     },
 }
+
+
+COMP_POST_CONTENT_QUERY = """
+query DiscussTopic($topicId: Int!) {
+  topic(id: $topicId) {
+    id
+    viewCount
+    topLevelCommentCount
+    subscribed
+    title
+    pinned
+    tags
+    hideFromTrending
+    post {
+      ...DiscussPost
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment DiscussPost on PostNode {
+  id
+  voteCount
+  voteStatus
+  content
+  updationDate
+  creationDate
+  status
+  isHidden
+  coinRewards {
+    ...CoinReward
+    __typename
+  }
+  author {
+    isDiscussAdmin
+    isDiscussStaff
+    username
+    nameColor
+    activeBadge {
+      displayName
+      icon
+      __typename
+    }
+    profile {
+      userAvatar
+      reputation
+      __typename
+    }
+    isActive
+    __typename
+  }
+  authorIsModerator
+  isOwnPost
+  __typename
+}
+
+fragment CoinReward on ScoreNode {
+  id
+  score
+  description
+  date
+  __typename
+}
+"""
+
+
+COMP_POST_CONTENT_DATA_QUERY = {
+    "operationName": "DiscussTopic",
+    "query": COMP_POST_CONTENT_QUERY,
+    "variables": {"topicId": 0},
+}
