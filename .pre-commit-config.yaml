@@ -1,0 +1,19 @@
+repos:
+-   repo: https://github.com/psf/black
+    rev: 22.1.0
+    hooks:
+    - id: black
+      language_version: python3.9
+      args: ["--line-length", "120"]
+-   repo: https://gitlab.com/pycqa/flake8
+    rev: 4.0.1
+    hooks:
+    - id: flake8
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.931
+    hooks:
+      - id: mypy
+        args: [--ignore-missing-imports]
+        exclude: "intent/app/api/routes/v1/endpoints/slot_type.py"
+        additional_dependencies:
+          - "pydantic"

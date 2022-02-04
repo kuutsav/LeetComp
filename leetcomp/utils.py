@@ -24,7 +24,7 @@ def session_scope() -> sessionmaker:
     try:
         yield session
         session.commit()
-    except:
+    except:  # noqa: # type: ignore
         session.rollback()
         raise
     finally:

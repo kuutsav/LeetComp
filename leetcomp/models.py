@@ -4,7 +4,7 @@ from sqlalchemy.orm import declarative_base
 Base = declarative_base()
 
 
-class Posts(Base):
+class Posts(Base):  # type: ignore
     __tablename__ = "posts"
     id = Column(String, primary_key=True)
     title = Column(String)
