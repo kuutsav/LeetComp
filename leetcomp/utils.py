@@ -4,7 +4,7 @@ import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from .models import Base
+from leetcomp.models import Base
 
 
 # sqlite engine

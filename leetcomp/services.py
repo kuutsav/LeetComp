@@ -4,14 +4,14 @@ import os
 import random
 import requests  # type: ignore
 import time
-from typing import Any, Dict, List, Set, Tuple
+from typing import Any, Dict, List, Pattern, Set, Tuple
 
 from loguru import logger
 from tqdm import trange
 
-from .models import Posts
-from .queries import COMP_POSTS_DATA_QUERY, COMP_POST_CONTENT_DATA_QUERY
-from .utils import get_today, session_scope
+from leetcomp.models import Posts
+from leetcomp.queries import COMP_POSTS_DATA_QUERY, COMP_POST_CONTENT_DATA_QUERY
+from leetcomp.utils import get_today, session_scope
 
 
 CACHE_DIR = ".cache"
@@ -193,3 +193,8 @@ def update_posts_content_info() -> None:
     except KeyboardInterrupt:
         session.commit()
         session.close()
+
+
+if __name__ == "__main__":
+    get_posts_meta_info()
+    update_posts_content_info()
