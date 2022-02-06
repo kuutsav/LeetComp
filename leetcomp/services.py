@@ -4,10 +4,9 @@ import os
 import random
 import requests  # type: ignore
 import time
-from typing import Any, Dict, List, Pattern, Set, Tuple
+from typing import Any, Dict, List, Set, Tuple
 
 from loguru import logger
-from tqdm import trange
 
 from leetcomp.models import Posts
 from leetcomp.queries import COMP_POSTS_DATA_QUERY, COMP_POST_CONTENT_DATA_QUERY
@@ -153,22 +152,21 @@ def get_posts_meta_info() -> None:
         n_pages = math.ceil(n_posts / n_posts_per_req)
         logger.info(f"Found {n_posts} posts({n_pages} pages)")
         # fetching the rest of the pages
-        with trange(1, n_pages + 1) as t:
-            for page_no in t:
-                sleep_for = 0 if cache_is_used else random.random() + 0.5
-                time.sleep(sleep_for)
-                start += n_posts_per_req
-                data, _, cache_is_used = _get_info_from_posts(start, n_posts_per_req)
-                new_data = _get_new_posts(data, old_post_ids)
-                if not new_data:
-                    logger.info(f"{n_new_posts} posts synced, skipping the rest ...")
-                    break
-                with session_scope() as session:
-                    session.add_all([Posts(**d) for d in new_data])
-                    _update_old_post_ids(old_post_ids, new_data)
-                    n_new_posts += len(new_data)
-                t.set_description(f"Page {page_no}")
-                t.set_postfix(slept_for=sleep_for)
+        for page_no in range(1, n_pages + 1):
+            sleep_for = 0 if cache_is_used else random.random() + 0.5
+            time.sleep(sleep_for)
+            start += n_posts_per_req
+            data, _, cache_is_used = _get_info_from_posts(start, n_posts_per_req)
+            new_data = _get_new_posts(data, old_post_ids)
+            if not new_data:
+                logger.info(f"{n_new_posts} posts synced, skipping the rest ...")
+                break
+            with session_scope() as session:
+                session.add_all([Posts(**d) for d in new_data])
+                _update_old_post_ids(old_post_ids, new_data)
+                n_new_posts += len(new_data)
+            if page_no % 10 == 0:
+                logger.info(f"{page_no:>3}/{n_pages+1} pages done; {page_no*100/n_pages:.2f}%; slept_for={sleep_for}")
     except KeyboardInterrupt:
         session.commit()
         session.close()
@@ -179,17 +177,16 @@ def update_posts_content_info() -> None:
     logger.info(f"Found {len(post_ids_without_content)} post ids without content, syncing ...")
     try:
         cache_is_used = False
-        with trange(len(post_ids_without_content)) as t:
-            for ix in t:
-                post_id = post_ids_without_content[ix]
-                sleep_for = 0 if cache_is_used else random.random() + 0.5
-                time.sleep(sleep_for)
-                post_content, cache_is_used = _get_content_from_post(post_id)
-                with session_scope() as session:
-                    post = session.query(Posts).filter(Posts.id == post_id).first()
-                    post.content = post_content
-                t.set_description(f"PostId {post_id}")
-                t.set_postfix(sleep_for=sleep_for)
+        for ix in range(len(post_ids_without_content)):
+            post_id = post_ids_without_content[ix]
+            sleep_for = 0 if cache_is_used else random.random() + 0.5
+            time.sleep(sleep_for)
+            post_content, cache_is_used = _get_content_from_post(post_id)
+            with session_scope() as session:
+                post = session.query(Posts).filter(Posts.id == post_id).first()
+                post.content = post_content
+            if ix % 10 == 0:
+                logger.info(f"PostID {post_id}; {ix:>3}/{len(post_ids_without_content)} posts done")
     except KeyboardInterrupt:
         session.commit()
         session.close()

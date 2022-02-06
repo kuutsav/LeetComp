@@ -145,5 +145,5 @@ dmypy.json
 cython_debug/
 
 .cache
-*.db
+*_backup.db
 *.json

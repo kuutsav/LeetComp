@@ -12,10 +12,11 @@ var tableTbodyRef = document.getElementById("postInfo").getElementsByTagName('tb
 function updatePostsTableContent(startIndex, endIndex) {
     var myHtmlContent = "";
     for (var i = startIndex; i < endIndex; i++) {
-        myHtmlContent += "<tr><td>" + data[i]["companies"][0][2] + "</td>";
-        myHtmlContent += "<td>" + data[i]["titles"][0][2] + "</td>";
-        myHtmlContent += "<td>" + data[i]["yoe"][0][2] + "</td>";
-        myHtmlContent += "<td>" + "1000" + "</td>";
+        myHtmlContent += "<tr><td>" + data[i]["company"] + "</td>";
+        myHtmlContent += "<td>" + data[i]["role"] + "</td>";
+        myHtmlContent += "<td>" + data[i]["yoe"] + "</td>";
+        myHtmlContent += "<td>" + data[i]["salary"] + "</td>";
+        myHtmlContent += "<td>" + data[i]["date"] + "</td>";
         myHtmlContent += "<td>" + data[i]["viewCount"] + "</td>";
         myHtmlContent += "<td>" + data[i]["voteCount"] + "</td>";
         myHtmlContent += "<td>" + data[i]["id"] + "</td></tr>";
