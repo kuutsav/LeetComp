@@ -146,4 +146,4 @@ cython_debug/
 
 .cache
 *_backup.db
-*.json
+posts_info.json
