@@ -24,6 +24,7 @@
         "pune": "pune"
     },
     "usa": {
+        "arizona": "arizona",
         "atlanta": "atlanta",
         "austin": "austin",
         "bay area": "san francisco",
@@ -51,6 +52,7 @@
         "nyc": "new york",
         "palo alto": "san francisco",
         "plano": "plano",
+        "raleigh": "raleigh",
         "redmond": "redmond",
         "redwood city": "redwood city",
         "san francisco": "san francisco",

@@ -10,12 +10,16 @@ from leetcomp.utils import session_scope
 
 
 LABEL_SPECIFICATION = {
-    "RE_COMPANY": re.compile(r"\*?\*?company\s?\*?\*?[:-]-?\s?\*?\*?(?P<label>[&\w\.\-\(\)\,\/\` ]+)"),
+    "RE_COMPANY": re.compile(
+        r"\*?\*?company\s?\*?\*?[:-]-?\s?\*?\*?(?P<label>[&\w\.\-\(\)\,\/\` ]+)"
+    ),
     "RE_ROLE": re.compile(r"title\s?(/level)?\s?[:-]-?\s?(?P<label>[&\w\.\-\/\+\#\,\(\)\` ]+)"),
     "RE_YOE": re.compile(
         r"((yrs|years\sof\s)(experience|exp)|yoe|(\\n|\btotal\s)experience)\s?[:-]-?\s?(?P<label>[\w\.\+\~\-\,\/\` ]+)"
     ),
-    "RE_SALARY": re.compile(r"(salary|base|base pay)\s?[:-]-?\s?(?P<label>[\w\,\₹\$\.\/\-\(\)\`\\u20b9&#8377;\~ ]+)"),
+    "RE_SALARY": re.compile(
+        r"(salary|base|base pay)\s?[:-]-?\s?(?P<label>[\w\,\₹\$\.\/\-\(\)\`\\u20b9&#8377;\~ ]+)"
+    ),
     "RE_LOCATION": re.compile(r"location\s?[:-]-?\s?(?P<label>[\w\,\` ]+)"),
     "RE_SALARY_TOTAL": re.compile(
         r"\ntot?al (1st year\s)?(comp[e|a]nsation|comp|ctc)(\sfor 1st year)?(\s?\(\s?(salary|base).+?\))?(?P<label>.+)"
@@ -85,9 +89,9 @@ def _get_location(title: str, content: str) -> Tuple[str, str]:
                 for match in re.finditer(cities_regex, location):
                     city = match.group("city")
                     return (city, country)
-    for country in LOCATION_SPECIFICATION.keys():
-        if re.findall(r"[\(\s\,\/\|]" + country, title):
-            return ("", country)
+        for country in LOCATION_SPECIFICATION.keys():
+            if re.findall(r"[\(\s\,\/\|]" + country, location):
+                return ("", country)
     return ("", "")
 
 
@@ -125,11 +129,11 @@ def parse_posts_and_save_tagged_info() -> None:
     logger.info(f"Posts with all the info: {len(raw_info)}")
     logger.info(f"Posts with location info: {len([p for p in raw_info if 'city' in p])}")
 
-    # n = 0
-    # for r in raw_info:
-    #     if "city" not in r:
-    #         n += 1
-    #         print(n, r["title"], content[r["id"]], "\n")
+    n = 0
+    for r in raw_info:
+        if "city" not in r:
+            n += 1
+            print(n, r["title"], content[r["id"]], "\n")
 
 
 if __name__ == "__main__":
