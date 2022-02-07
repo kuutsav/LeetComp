@@ -55,11 +55,7 @@ def _find_matches(regex_pattern: Pattern[str], content: str) -> List[str]:
 
 
 def _get_info_as_flat_list(
-    companies: List[str],
-    titles: List[str],
-    yoes: List[str],
-    salaries: List[str],
-    info: Dict[str, Any],
+    companies: List[str], titles: List[str], yoes: List[str], salaries: List[str], info: Dict[str, Any]
 ) -> List[Dict[str, Any]]:
     n_info = min([len(companies), len(titles), len(yoes), len(salaries)])
     expanded_info = []
