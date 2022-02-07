@@ -15,6 +15,7 @@ LABEL_SPECIFICATION = {
     "RE_YOE": re.compile(
         r"((yrs|years\sof\s)(experience|exp)|yoe|(\\n|\btotal\s)experience)\s?[:-]-?\s?(?P<label>[\w\.\+\~\-\,\/\` ]+)"
     ),
+    "RE_YOE_CLEAN": re.compile(r"(\d{1,2}(\.\d{1,2})?)\s?(yrs|years?)?(\s?(\d{1,2})\s?(months))?"),
     "RE_SALARY": re.compile(r"(salary|base|base pay)\s?[:-]-?\s?(?P<label>[\w\,\₹\$\.\/\-\(\)\`\\u20b9&#8377;\~ ]+)"),
     "RE_LOCATION": re.compile(r"location\s?[:-]-?\s?(?P<label>[\w\,\` ]+)"),
     "RE_SALARY_TOTAL": re.compile(
@@ -72,7 +73,7 @@ def _get_info_as_flat_list(
     return expanded_info
 
 
-def _get_location(title: str, content: str) -> Tuple[str, str]:
+def _get_clean_location(title: str, content: str) -> Tuple[str, str]:
     for country, cities_regex in LOCATION_SPECIFICATION.items():
         if cities_regex:
             for match in re.finditer(cities_regex, title):
@@ -85,10 +86,22 @@ def _get_location(title: str, content: str) -> Tuple[str, str]:
                 for match in re.finditer(cities_regex, location):
                     city = match.group("city")
                     return (city, country)
-    for country in LOCATION_SPECIFICATION.keys():
-        if re.findall(r"[\(\s\,\/\|]" + country, title):
-            return ("", country)
+        for country in LOCATION_SPECIFICATION.keys():
+            if re.findall(r"[\(\s\,\/\|]" + country, location):
+                return ("", country)
     return ("", "")
+
+
+def _get_clean_yoe(yoe: str, clean_title: str, role: str) -> float:
+    if yoe in {"fresher", "new grad", "n/a"}:
+        return 0.0
+    if not yoe:
+        if "intern" in clean_title or "intern" in role:
+            return 0.0
+    for m in re.finditer(LABEL_SPECIFICATION["RE_YOE_CLEAN"], yoe):
+        groups = m.groups()
+        return float(groups[0]) + (int(groups[4]) / 12 if groups[4] else 0)
+    return -1.0
 
 
 def parse_posts_and_save_tagged_info() -> None:
@@ -99,20 +112,22 @@ def parse_posts_and_save_tagged_info() -> None:
             total_posts += 1
             info = {"id": r.id, "title": r.title, "voteCount": r.voteCount, "viewCount": r.viewCount,
                     "date": datetime.fromtimestamp(int(r.creationDate)).strftime("%Y-%m-%d")}
-            # fmt: on
             clean_content = _preprocess_text(r.content)
             content[r.id] = clean_content
             companies = _find_matches(LABEL_SPECIFICATION["RE_COMPANY"], clean_content)
             roles = _find_matches(LABEL_SPECIFICATION["RE_ROLE"], clean_content)
             yoes = _find_matches(LABEL_SPECIFICATION["RE_YOE"], clean_content)
             salaries = _find_matches(LABEL_SPECIFICATION["RE_SALARY"], clean_content)
-            # fmt: off
             if companies and roles and yoes and salaries:
                 expanded_info = _get_info_as_flat_list(companies, roles, yoes, salaries, info)
-                location = _get_location(_preprocess_text(r.title), clean_content)
+                location = _get_clean_location(_preprocess_text(r.title), clean_content)
                 if location[1]:
                     for info in expanded_info:
                         info["city"] = location[0]; info["country"] = location[1]
+                for info in expanded_info:
+                    info["cleanYoe"] = _get_clean_yoe(
+                        info["yoe"].lower(), _preprocess_text(r.title).lower(), info["role"].lower()
+                    )
                 raw_info += expanded_info
             else:
                 n_dropped += 1
@@ -124,12 +139,7 @@ def parse_posts_and_save_tagged_info() -> None:
     logger.info(f"Total posts: {total_posts}; N posts dropped: {n_dropped}")
     logger.info(f"Posts with all the info: {len(raw_info)}")
     logger.info(f"Posts with location info: {len([p for p in raw_info if 'city' in p])}")
-
-    # n = 0
-    # for r in raw_info:
-    #     if "city" not in r:
-    #         n += 1
-    #         print(n, r["title"], content[r["id"]], "\n")
+    logger.info(f"Posts with yoe info: {len([p for p in raw_info if p['cleanYoe'] >= 0])}")
 
 
 if __name__ == "__main__":
