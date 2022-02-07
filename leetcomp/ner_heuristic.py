@@ -21,6 +21,7 @@ LABEL_SPECIFICATION = {
     "RE_SALARY_TOTAL": re.compile(
         r"\ntot?al (1st year\s)?(comp[e|a]nsation|comp|ctc)(\sfor 1st year)?(\s?\(\s?(salary|base).+?\))?(?P<label>.+)"
     ),
+    "RE_SALARY_CLEAN_LPA": re.compile(r"(\d{1,3}(\.\d{1,2})?)\s?(lpa|lakh|lac|l)"),
 }
 
 LOCATION_SPECIFICATION = {}
@@ -74,22 +75,25 @@ def _get_clean_location(title: str, content: str) -> Tuple[str, str]:
         if cities_regex:
             for match in re.finditer(cities_regex, title):
                 city = match.group("city")
-                return (city, country)
+                return (location_data[country][city], country)
     for match in re.finditer(LABEL_SPECIFICATION["RE_LOCATION"], content):
         location = "," + match.group("label")
         for country, cities_regex in LOCATION_SPECIFICATION.items():
             if cities_regex:
                 for match in re.finditer(cities_regex, location):
                     city = match.group("city")
-                    return (city, country)
+                    return (location_data[country][city], country)
         for country in LOCATION_SPECIFICATION.keys():
             if re.findall(r"[\(\s\,\/\|]" + country, location):
                 return ("", country)
+    for country in LOCATION_SPECIFICATION.keys():
+        if re.findall(r"[\(\s\,\/\|]" + country, title):
+            return ("", country)
     return ("", "")
 
 
 def _get_clean_yoe(yoe: str, clean_title: str, role: str) -> float:
-    if yoe in {"fresher", "new grad", "n/a"}:
+    if yoe in {"fresher", "new grad", "n/a", "none"}:
         return 0.0
     if not yoe:
         if "intern" in clean_title or "intern" in role:
@@ -98,6 +102,29 @@ def _get_clean_yoe(yoe: str, clean_title: str, role: str) -> float:
         groups = m.groups()
         return float(groups[0]) + (int(groups[4]) / 12 if groups[4] else 0)
     return -1.0
+
+
+def _get_clean_salary_for_india(salary: str) -> Tuple[float, str]:
+    if "per month" in salary or "/month" in salary:
+        for m in re.finditer(r"\d{4,6}", salary):
+            return (float(m.group()), "monthly")
+        for m in re.finditer(r"(\d{2})k ", salary):
+            return (float(m.groups()[0]) * 1000, "monthly")
+    for m in re.finditer(LABEL_SPECIFICATION["RE_SALARY_CLEAN_LPA"], salary):
+        return (float(m.groups()[0]) * 1_00_000, "yearly")
+    for m in re.finditer(r"\d{6,7}", salary):
+        return (float(m.group()), "yearly")
+    return (-1, "yearly")
+
+
+def _report(raw_info: List[Dict[str, Any]]) -> None:
+    logger.info(f"Posts with all the info: {len(raw_info)}")
+    logger.info(f"Posts with location: {len([p for p in raw_info if 'country' in p])}")
+    logger.info(f"Posts with yoe: {len([p for p in raw_info if p['cleanYoe'] >= 0])}")
+    logger.info(f"Posts from india: {len([p for p in raw_info if 'country' in p and p['country'] == 'india'])}")
+    logger.info(
+        f"Posts from india with salary info: {len([p for p in raw_info if 'cleanSalary' in p and p['cleanSalary'] >= 10])}"
+    )
 
 
 def parse_posts_and_save_tagged_info() -> None:
@@ -124,18 +151,20 @@ def parse_posts_and_save_tagged_info() -> None:
                     info["cleanYoe"] = _get_clean_yoe(
                         info["yoe"].lower(), _preprocess_text(r.title).lower(), info["role"].lower()
                     )
+                    if "country" in info and info["country"] == "india":
+                        info["cleanSalary"], info["yrOrPm"] = _get_clean_salary_for_india(
+                            info["salary"].replace(",", "").lower()
+                        )
                 raw_info += expanded_info
             else:
                 n_dropped += 1
     # fmt: on
     raw_info = sorted(raw_info, key=lambda x: x["date"], reverse=True)
-    with open("posts_info.json", "w") as f:
+    with open("data/posts_info.json", "w") as f:
         json.dump(raw_info, f)
 
     logger.info(f"Total posts: {total_posts}; N posts dropped: {n_dropped}")
-    logger.info(f"Posts with all the info: {len(raw_info)}")
-    logger.info(f"Posts with location info: {len([p for p in raw_info if 'city' in p])}")
-    logger.info(f"Posts with yoe info: {len([p for p in raw_info if p['cleanYoe'] >= 0])}")
+    _report(raw_info)
 
 
 if __name__ == "__main__":
