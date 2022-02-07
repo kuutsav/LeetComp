@@ -9,6 +9,9 @@ from leetcomp.models import Posts
 from leetcomp.utils import session_scope
 
 
+BASE_SALARY_RANGE_INDIA = (2_00_000, 100_00_000)
+INTERN_SALARY_RANGE_INDIA = (10_000, 2_00_000)
+
 LABEL_SPECIFICATION = {
     "RE_COMPANY": re.compile(r"\*?\*?company\s?\*?\*?[:-]-?\s?\*?\*?(?P<label>[&\w\.\-\(\)\,\/\` ]+)"),
     "RE_ROLE": re.compile(r"title\s?(/level)?\s?[:-]-?\s?(?P<label>[&\w\.\-\/\+\#\,\(\)\` ]+)"),
@@ -26,6 +29,7 @@ LABEL_SPECIFICATION = {
 
 LOCATION_SPECIFICATION = {}
 
+# update the location specification
 with open("data/locations.json", "r") as f:
     location_data = json.load(f)
 
@@ -100,7 +104,7 @@ def _get_clean_yoe(yoe: str, clean_title: str, role: str) -> float:
             return 0.0
     for m in re.finditer(LABEL_SPECIFICATION["RE_YOE_CLEAN"], yoe):
         groups = m.groups()
-        return float(groups[0]) + (int(groups[4]) / 12 if groups[4] else 0)
+        return round(float(groups[0]) + (int(groups[4]) / 12 if groups[4] else 0), 2)
     return -1.0
 
 
@@ -119,12 +123,36 @@ def _get_clean_salary_for_india(salary: str) -> Tuple[float, str]:
 
 def _report(raw_info: List[Dict[str, Any]]) -> None:
     logger.info(f"Posts with all the info: {len(raw_info)}")
-    logger.info(f"Posts with location: {len([p for p in raw_info if 'country' in p])}")
-    logger.info(f"Posts with yoe: {len([p for p in raw_info if p['cleanYoe'] >= 0])}")
-    logger.info(f"Posts from india: {len([p for p in raw_info if 'country' in p and p['country'] == 'india'])}")
-    logger.info(
-        f"Posts from india with salary info: {len([p for p in raw_info if 'cleanSalary' in p and p['cleanSalary'] >= 10])}"
-    )
+    logger.info(f"Posts with Location: {len([r for r in raw_info if 'country' in r])}")
+    logger.info(f"Posts with YOE: {len([r for r in raw_info if r['cleanYoe'] >= 0])}")
+    logger.info(f"Posts from India: {len([r for r in raw_info if 'country' in r and r['country'] == 'india'])}")
+
+
+def _is_valid_yearly_base_pay_from_india(base_pay: float):
+    return base_pay >= BASE_SALARY_RANGE_INDIA[0] and base_pay <= BASE_SALARY_RANGE_INDIA[1]
+
+
+def _is_valid_monthly_internship_pay_from_india(base_pay: float):
+    return base_pay >= INTERN_SALARY_RANGE_INDIA[0] and base_pay <= INTERN_SALARY_RANGE_INDIA[1]
+
+
+def _filter_for_correct_fixed_salary(raw_info: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    n_india = 0
+    n_dropped = 0
+    filtered_info = []
+    for r in raw_info:
+        if "country" in r and r["country"] == "india":
+            n_india += 1
+            if r["yrOrPm"] == "yearly" and not _is_valid_yearly_base_pay_from_india(r["cleanSalary"]):
+                n_dropped += 1
+                continue
+            elif r["yrOrPm"] == "monthly" and not _is_valid_monthly_internship_pay_from_india(r["cleanSalary"]):
+                n_dropped += 1
+                continue
+            else:
+                filtered_info.append(r)
+    logger.info(f"Removed {n_dropped} records out of {n_india} from India based on the valid Base Pay range")
+    return filtered_info
 
 
 def parse_posts_and_save_tagged_info() -> None:
@@ -159,12 +187,14 @@ def parse_posts_and_save_tagged_info() -> None:
             else:
                 n_dropped += 1
     # fmt: on
-    raw_info = sorted(raw_info, key=lambda x: x["date"], reverse=True)
-    with open("data/posts_info.json", "w") as f:
-        json.dump(raw_info, f)
 
     logger.info(f"Total posts: {total_posts}; N posts dropped: {n_dropped}")
     _report(raw_info)
+    raw_info = _filter_for_correct_fixed_salary(raw_info)
+
+    raw_info = sorted(raw_info, key=lambda x: x["date"], reverse=True)
+    with open("data/posts_info.json", "w") as f:
+        json.dump(raw_info, f)
 
 
 if __name__ == "__main__":
