@@ -148,3 +148,4 @@ cython_debug/
 *_backup.db
 posts_info.json
 inverted_index.json
+.DS_Store
