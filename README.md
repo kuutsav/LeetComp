@@ -66,4 +66,5 @@ $ poetry shell
 - Add `Total Comp`
 - Add data sorting capabilities
 - Trending companies
+- Improve page nav
 - Global data support

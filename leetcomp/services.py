@@ -15,6 +15,7 @@ from leetcomp.utils import get_today, session_scope
 
 CACHE_DIR = ".cache"
 LEETCODE_GRAPHQL_URL = "https://leetcode.com/graphql"
+SLEEP_FOR_ATLEAST = 1  # seconds
 
 
 # cache dir; removes the data cached before today
@@ -153,7 +154,7 @@ def get_posts_meta_info() -> None:
         logger.info(f"Found {n_posts} posts({n_pages} pages)")
         # fetching the rest of the pages
         for page_no in range(1, n_pages + 1):
-            sleep_for = 0 if cache_is_used else random.random() + 0.5
+            sleep_for = 0 if cache_is_used else random.random() + SLEEP_FOR_ATLEAST
             time.sleep(sleep_for)
             start += n_posts_per_req
             data, _, cache_is_used = _get_info_from_posts(start, n_posts_per_req)
@@ -179,7 +180,7 @@ def update_posts_content_info() -> None:
         cache_is_used = False
         for ix in range(len(post_ids_without_content)):
             post_id = post_ids_without_content[ix]
-            sleep_for = 0 if cache_is_used else random.random() + 0.5
+            sleep_for = 0 if cache_is_used else random.random() + SLEEP_FOR_ATLEAST
             time.sleep(sleep_for)
             post_content, cache_is_used = _get_content_from_post(post_id)
             with session_scope() as session:

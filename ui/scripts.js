@@ -166,11 +166,13 @@ function search(e) {
         for (i = 0; i < txtSplits.length; i++) {
             txtToSearch = txtSplits[i];
             if (txtToSearch in invertedIndex) {
-                console.log(invertedIndex[txtToSearch]);
                 allIxs = allIxs.concat(invertedIndex[txtToSearch]);
-                console.log(allIxs);
             }
         }
+        allIxs = [...new Set(allIxs)];
+        allIxs.sort(function (a, b) {
+            return a - b;
+        });;
         filterSearchIndexes(allIxs);
         resetData();
     }
