@@ -235,8 +235,6 @@ def parse_posts_and_save_tagged_info() -> None:
             companies = _find_matches(LABEL_SPECIFICATION["RE_COMPANY"], clean_content)
             roles = _find_matches(LABEL_SPECIFICATION["RE_ROLE"], clean_content)
             yoes = _find_matches(LABEL_SPECIFICATION["RE_YOE"], clean_content)
-            if r.id == "1744070":
-                print(clean_content)
             salaries = _find_matches(LABEL_SPECIFICATION["RE_SALARY"], clean_content)
             if companies and roles and yoes and salaries:
                 expanded_info = _get_info_as_flat_list(companies, roles, yoes, salaries, info)
