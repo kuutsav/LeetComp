@@ -20,7 +20,7 @@ function updatePageCount() {
 }
 
 // Reference to the table with posts info
-var tableTbodyRef = document.getElementById("postInfo").getElementsByTagName('tbody')[0];
+var tableTbodyRef = document.getElementById("postInfo").getElementsByTagName("tbody")[0];
 
 function getAllBaseSalaries() {
     var salaries = [];
@@ -39,14 +39,14 @@ function plotSalaryBarChartData() {
         marker: { color: "green" }
     };
     var layout = {
-        title: { text: '# salaries #', font: { size: 12 }},
+        title: { text: "# salaries #", font: { size: 12 } },
         height: 400,
         margin: { t: 80, l: 0, r: 0 },
         yaxis: { automargin: true },
         xaxis: { tickprefix: "₹ ", ticksuffix: " lpa" }
     };
     var salaryBarChart = [trace];
-    Plotly.newPlot('salaryBarChart', salaryBarChart, layout);
+    Plotly.newPlot("salaryBarChart", salaryBarChart, layout);
 }
 plotSalaryBarChartData();
 
@@ -58,21 +58,86 @@ function plotTopCompaniesChartData() {
         counts.push(metaInfo["top20Companies"][i][1])
     }
     var data = [{
-        type: 'bar',
+        type: "bar",
         x: companies,
         y: counts,
-        orientation: 'v',
+        orientation: "v",
         opacity: 0.5,
         marker: { color: "green" }
       }];
     var layout = {
-        title: { text: '# top companies (static list) #', font: { size: 12 }},
-        margin: { t: 80 },
-        xaxis: { tickfont: {size: 8} },
+        title: { text: "# top companies (static list) #", font: { size: 12 } },
+        margin: { t: 80, l: 25 },
+        xaxis: { tickfont: { size: 8 } },
     }
-    Plotly.newPlot('topCompaniesBarChart', data, layout);
+    Plotly.newPlot("topCompaniesBarChart", data, layout);
 }
 plotTopCompaniesChartData();
+
+function plotSalaryYoeBinsChart() {
+    var yoeBin1 = []; var yoeBin2 = []; var yoeBin3 = []; var yoeBin4 = []; var yoeBin5 = [];
+    for (i = 0; i < data.length; i++) {
+        if (data[i]["cleanYoe"] >= 0 & data[i]["cleanYoe"] < 1) {
+            yoeBin1.push(data[i]["cleanSalary"]);
+        }
+        else if (data[i]["cleanYoe"] >= 1 & data[i]["cleanYoe"] < 3) {
+            yoeBin2.push(data[i]["cleanSalary"]);
+        }
+        else if (data[i]["cleanYoe"] >= 3 & data[i]["cleanYoe"] < 6) {
+            yoeBin3.push(data[i]["cleanSalary"]);
+        }
+        else if (data[i]["cleanYoe"] >= 6 & data[i]["cleanYoe"] < 9) {
+            yoeBin4.push(data[i]["cleanSalary"]);
+        }
+        else if (data[i]["cleanYoe"] >= 9) {
+            yoeBin5.push(data[i]["cleanSalary"]);
+        }
+    }
+    var trace1 = {
+        y: yoeBin1,
+        type: "box",
+        name: "0-1",
+        opacity: 0.5,
+        marker: { color: "green" }
+    };
+    var trace2 = {
+        y: yoeBin2,
+        type: "box",
+        name: "1-3",
+        opacity: 0.5,
+        marker: { color: "green" }
+    };
+    var trace3 = {
+        y: yoeBin3,
+        type: "box",
+        name: "3-6",
+        opacity: 0.5,
+        marker: { color: "green" }
+    };
+    var trace4 = {
+        y: yoeBin4,
+        type: "box",
+        name: "6-9",
+        opacity: 0.5,
+        marker: { color: "green" }
+    };
+    var trace5 = {
+        y: yoeBin5,
+        type: "box",
+        name: "9+",
+        opacity: 0.5,
+        marker: { color: "green" }
+    };
+    var layout = {
+        title: { text: "# yoe bins #", font: { size: 12 } }, margin: { t: 80, b: 70 },
+        xaxis: { tickfont: { size: 8 } },
+        showlegend: false
+    }
+
+    var traces = [trace1, trace2, trace3, trace4, trace5];
+    Plotly.newPlot("salaryYoeBinsChart", traces, layout);
+}
+plotSalaryYoeBinsChart();
 
 function getFormattedYoe(yoe) {
     if (yoe == -1) {
@@ -91,7 +156,7 @@ function updatePostsTableContent(startIndex, endIndex) {
         myHtmlContent += "<tr><td>" + data[i]["company"] + "</td>";
         myHtmlContent += "<td>" + data[i]["role"].toLowerCase() + "</td>";
         myHtmlContent += "<td>" + getFormattedYoe(data[i]["cleanYoe"]) + "</td>";
-        myHtmlContent += "<td>₹ " + data[i]["cleanSalary"].toLocaleString('en-IN') + "</td>";
+        myHtmlContent += "<td>₹ " + data[i]["cleanSalary"].toLocaleString("en-IN") + "</td>";
         myHtmlContent += "<td>" + data[i]["date"] + "</td>";
         myHtmlContent += "<td>" + data[i]["viewCount"] + "</td>";
         myHtmlContent += "<td>" + data[i]["voteCount"] + "</td>";
@@ -142,6 +207,7 @@ updateNRows();
 
 function resetData() {
     plotSalaryBarChartData();
+    plotSalaryYoeBinsChart();
     updatePageCount();
     updatePostsTableContent(0, pageSize);
     resetNavPageNo();
