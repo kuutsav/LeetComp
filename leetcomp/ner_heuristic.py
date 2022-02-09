@@ -14,18 +14,14 @@ BASE_SALARY_RANGE_INDIA = (2_00_000, 100_00_000)
 INTERN_SALARY_RANGE_INDIA = (10_000, 2_00_000)
 
 LABEL_SPECIFICATION = {
-    "RE_COMPANY": re.compile(
-        r"\*?\*?company\s?\*?\*?[:-]-?\s?\*?\*?(?P<label>[&\w\.\-\(\)\,\/\` ]+)"
-    ),
+    "RE_COMPANY": re.compile(r"\*?\*?company\s?\*?\*?[:-]-?\s?\*?\*?(?P<label>[&\w\.\-\(\)\,\/\` ]+)"),
     "RE_ROLE": re.compile(r"title\s?(/level)?\s?[:-]-?\s?(?P<label>[&\w\.\-\/\+\#\,\(\)\` ]+)"),
     "RE_YOE": re.compile(
         r"((yrs|years\sof\s)(experience|exp)|yoe|(\\n|\btotal\s)experience)\s?[:-]-?\s?(?P<label>[\w\.\+\~\-\,\/\` ]+)"
     ),
     "RE_YOE_CLEAN": re.compile(r"(\d{1,2}(\.\d{1,2})?)\s?(yrs|years?)?(\s?(\d{1,2})\s?(months))?"),
     "RE_YOE_CLEAN_MONTHS": re.compile(r"^(\d{1,2})\s?months?$"),
-    "RE_SALARY": re.compile(
-        r"(salary|base|base pay)\s?[:-]-?\s?(?P<label>[\w\,\₹\$\.\/\-\(\)\`\\u20b9&#8377;\~ ]+)"
-    ),
+    "RE_SALARY": re.compile(r"(salary|base|base pay)\s?[:-]-?\s?(?P<label>[\w\,\₹\$\.\/\-\(\)\`\\u20b9&#8377;\~ ]+)"),
     "RE_LOCATION": re.compile(r"location\s?[:-]-?\s?(?P<label>[\w\,\` ]+)"),
     "RE_SALARY_TOTAL": re.compile(
         r"\ntot?al (1st year\s)?(comp[e|a]nsation|comp|ctc)(\sfor 1st year)?(\s?\(\s?(salary|base).+?\))?(?P<label>.+)"
@@ -140,9 +136,7 @@ def _report(raw_info: List[Dict[str, Any]]) -> None:
     logger.info(f"Posts with all the info: {len(raw_info)}")
     logger.info(f"Posts with Location: {len([r for r in raw_info if 'country' in r])}")
     logger.info(f"Posts with YOE: {len([r for r in raw_info if r['cleanYoe'] >= 0])}")
-    logger.info(
-        f"Posts from India: {len([r for r in raw_info if 'country' in r and r['country'] == 'india'])}"
-    )
+    logger.info(f"Posts from India: {len([r for r in raw_info if 'country' in r and r['country'] == 'india'])}")
 
 
 def _is_valid_yearly_base_pay_from_india(base_pay: float):
@@ -160,14 +154,10 @@ def _filter_invalid_salaries(raw_info: List[Dict[str, Any]]) -> List[Dict[str, A
     for r in raw_info:
         if "country" in r and r["country"] == "india":
             n_india += 1
-            if r["yrOrPm"] == "yearly" and not _is_valid_yearly_base_pay_from_india(
-                r["cleanSalary"]
-            ):
+            if r["yrOrPm"] == "yearly" and not _is_valid_yearly_base_pay_from_india(r["cleanSalary"]):
                 n_dropped += 1
                 continue
-            elif r["yrOrPm"] == "monthly" and not _is_valid_monthly_internship_pay_from_india(
-                r["cleanSalary"]
-            ):
+            elif r["yrOrPm"] == "monthly" and not _is_valid_monthly_internship_pay_from_india(r["cleanSalary"]):
                 n_dropped += 1
                 continue
             else:
@@ -211,9 +201,7 @@ def _save_meta_info(total_posts: int, raw_info: List[Dict[str, Any]]) -> None:
     # meta data
     meta_info = {
         "totalPosts": total_posts,
-        "totalPostsFromIndia": len(
-            [r for r in raw_info if "country" in r and r["country"] == "india"]
-        ),
+        "totalPostsFromIndia": len([r for r in raw_info if "country" in r and r["country"] == "india"]),
         "lastUpdated": datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
         "top20Companies": top_20,
         "mostOffersInLastMonth": most_offers,
