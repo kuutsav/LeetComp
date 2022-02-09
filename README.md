@@ -21,7 +21,7 @@ $ poetry shell
 
 ## Updating data (stores in `Posts.db` under the parent folder)
 
-### 1. Fetching metadata for compensation posts
+#### 1. Fetching metadata for compensation posts
 
 ```python
 >>> from leetcomp.services import get_posts_meta_info
@@ -31,7 +31,7 @@ $ poetry shell
 2022-02-08 | INFO | get_posts_meta_info:162 - 32 posts synced, skipping the rest ...
 ```
 
-### 2. Updating Posts with the user content
+#### 2. Updating Posts with the user content
 
 ```python
 >>> from leetcomp.services import update_posts_content_info
@@ -45,7 +45,7 @@ $ poetry shell
 2022-02-09 | INFO | update_posts_content_info:190 - All post contents synced
 ```
 
-### 3. Parsing results for the ui
+#### 3. Parsing results for the ui
 
 ```python
 >>> from leetcomp.ner_heuristic import parse_posts_and_save_tagged_info
@@ -60,10 +60,20 @@ $ poetry shell
 2022-02-09 | INFO | _filter_invalid_salaries:154 - Dropped 221/3764 records due to invalid pay
 ```
 
+#### 4. Updating the inverted index
+
+```python
+>>> from leetcomp.inverted_index import build_inverted_index
+>>> build_inverted_index()
+
+2022-02-09 | INFO | __main__:build_inverted_index:58 - Keeping 1266/1266 tokens
+```
+
 ## Roadmap
 
 - Standardize `Company` and `Role`
 - Add `Total Comp`
+- Index `Company` and `Role` separately
 - Add data sorting capabilities
 - Trending companies
 - Improve page nav

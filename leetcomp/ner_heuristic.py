@@ -1,5 +1,5 @@
-from __future__ import unicode_literals
-from datetime import datetime
+from collections import Counter
+from datetime import datetime, timedelta
 import json
 import re
 from typing import Any, Dict, List, Pattern, Tuple
@@ -14,13 +14,18 @@ BASE_SALARY_RANGE_INDIA = (2_00_000, 100_00_000)
 INTERN_SALARY_RANGE_INDIA = (10_000, 2_00_000)
 
 LABEL_SPECIFICATION = {
-    "RE_COMPANY": re.compile(r"\*?\*?company\s?\*?\*?[:-]-?\s?\*?\*?(?P<label>[&\w\.\-\(\)\,\/\` ]+)"),
+    "RE_COMPANY": re.compile(
+        r"\*?\*?company\s?\*?\*?[:-]-?\s?\*?\*?(?P<label>[&\w\.\-\(\)\,\/\` ]+)"
+    ),
     "RE_ROLE": re.compile(r"title\s?(/level)?\s?[:-]-?\s?(?P<label>[&\w\.\-\/\+\#\,\(\)\` ]+)"),
     "RE_YOE": re.compile(
         r"((yrs|years\sof\s)(experience|exp)|yoe|(\\n|\btotal\s)experience)\s?[:-]-?\s?(?P<label>[\w\.\+\~\-\,\/\` ]+)"
     ),
     "RE_YOE_CLEAN": re.compile(r"(\d{1,2}(\.\d{1,2})?)\s?(yrs|years?)?(\s?(\d{1,2})\s?(months))?"),
-    "RE_SALARY": re.compile(r"(salary|base|base pay)\s?[:-]-?\s?(?P<label>[\w\,\₹\$\.\/\-\(\)\`\\u20b9&#8377;\~ ]+)"),
+    "RE_YOE_CLEAN_MONTHS": re.compile(r"^(\d{1,2})\s?months?$"),
+    "RE_SALARY": re.compile(
+        r"(salary|base|base pay)\s?[:-]-?\s?(?P<label>[\w\,\₹\$\.\/\-\(\)\`\\u20b9&#8377;\~ ]+)"
+    ),
     "RE_LOCATION": re.compile(r"location\s?[:-]-?\s?(?P<label>[\w\,\` ]+)"),
     "RE_SALARY_TOTAL": re.compile(
         r"\ntot?al (1st year\s)?(comp[e|a]nsation|comp|ctc)(\sfor 1st year)?(\s?\(\s?(salary|base).+?\))?(?P<label>.+)"
@@ -62,7 +67,11 @@ def _find_matches(regex_pattern: Pattern[str], content: str) -> List[str]:
 
 
 def _get_info_as_flat_list(
-    companies: List[str], titles: List[str], yoes: List[str], salaries: List[str], info: Dict[str, Any]
+    companies: List[str],
+    titles: List[str],
+    yoes: List[str],
+    salaries: List[str],
+    info: Dict[str, Any],
 ) -> List[Dict[str, Any]]:
     n_info = min([len(companies), len(titles), len(yoes), len(salaries)])
     expanded_info = []
@@ -101,6 +110,10 @@ def _get_clean_location(title: str, content: str) -> Tuple[str, str]:
 def _get_clean_yoe(yoe: str, clean_title: str, role: str) -> float:
     if yoe in {"fresher", "new grad", "n/a", "none"}:
         return 0.0
+    if "grad" in yoe:
+        return 0.0
+    for m in re.finditer(LABEL_SPECIFICATION["RE_YOE_CLEAN_MONTHS"], yoe):
+        return round(float(m.groups()[0]) / 12, 1)
     if not yoe:
         if "intern" in clean_title or "intern" in role:
             return 0.0
@@ -127,7 +140,9 @@ def _report(raw_info: List[Dict[str, Any]]) -> None:
     logger.info(f"Posts with all the info: {len(raw_info)}")
     logger.info(f"Posts with Location: {len([r for r in raw_info if 'country' in r])}")
     logger.info(f"Posts with YOE: {len([r for r in raw_info if r['cleanYoe'] >= 0])}")
-    logger.info(f"Posts from India: {len([r for r in raw_info if 'country' in r and r['country'] == 'india'])}")
+    logger.info(
+        f"Posts from India: {len([r for r in raw_info if 'country' in r and r['country'] == 'india'])}"
+    )
 
 
 def _is_valid_yearly_base_pay_from_india(base_pay: float):
@@ -145,16 +160,66 @@ def _filter_invalid_salaries(raw_info: List[Dict[str, Any]]) -> List[Dict[str, A
     for r in raw_info:
         if "country" in r and r["country"] == "india":
             n_india += 1
-            if r["yrOrPm"] == "yearly" and not _is_valid_yearly_base_pay_from_india(r["cleanSalary"]):
+            if r["yrOrPm"] == "yearly" and not _is_valid_yearly_base_pay_from_india(
+                r["cleanSalary"]
+            ):
                 n_dropped += 1
                 continue
-            elif r["yrOrPm"] == "monthly" and not _is_valid_monthly_internship_pay_from_india(r["cleanSalary"]):
+            elif r["yrOrPm"] == "monthly" and not _is_valid_monthly_internship_pay_from_india(
+                r["cleanSalary"]
+            ):
                 n_dropped += 1
                 continue
             else:
                 filtered_info.append(r)
     logger.info(f"Dropped {n_dropped}/{n_india} records due to invalid pay")
     return filtered_info
+
+
+def _get_clean_company_text(company: str) -> str:
+    return " ".join(re.findall(r"\w+", company.lower()))
+
+
+def _add_clean_companies(raw_info: List[Dict[str, Any]]) -> None:
+    companies_counter = Counter([_get_clean_company_text(r["company"]) for r in raw_info])
+    clean_company_map = {}
+    for company, _ in companies_counter.most_common(len(companies_counter)):
+        if company.split(" ")[0] not in clean_company_map:
+            clean_company_map[company] = company
+        else:
+            clean_company_map[company] = company.split(" ")[0]
+    for r in raw_info:
+        clean_company = clean_company_map[_get_clean_company_text(r["company"])]
+        r["cleanCompany"] = " ".join([txt.capitalize() for txt in clean_company.split(" ")])
+
+
+def _save_raw_info(raw_info: List[Dict[str, Any]]) -> None:
+    raw_info = sorted(raw_info, key=lambda x: x["date"], reverse=True)
+    with open("data/posts_info.json", "w") as f:
+        json.dump(raw_info, f)
+
+
+def _save_meta_info(total_posts: int, raw_info: List[Dict[str, Any]]) -> None:
+    # top 20 companies
+    company_counter = Counter([r["cleanCompany"] for r in raw_info])
+    top_20 = [(company, count) for company, count in company_counter.most_common(20)]
+    # most offers in the last 1 month
+    from_date = (datetime.today() - timedelta(days=30)).strftime("%Y-%m-%d")
+    filtered_info = [r for r in raw_info if r["date"] >= from_date]
+    company_counter = Counter([r["cleanCompany"] for r in filtered_info])
+    most_offers = [(company, count) for company, count in company_counter.most_common(10)]
+    # meta data
+    meta_info = {
+        "totalPosts": total_posts,
+        "totalPostsFromIndia": len(
+            [r for r in raw_info if "country" in r and r["country"] == "india"]
+        ),
+        "lastUpdated": datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
+        "top20Companies": top_20,
+        "mostOffersInLastMonth": most_offers,
+    }
+    with open("data/meta_info.json", "w") as f:
+        json.dump(meta_info, f)
 
 
 def parse_posts_and_save_tagged_info() -> None:
@@ -197,9 +262,9 @@ def parse_posts_and_save_tagged_info() -> None:
     _report(raw_info)
     raw_info = _filter_invalid_salaries(raw_info)
 
-    raw_info = sorted(raw_info, key=lambda x: x["date"], reverse=True)
-    with open("data/posts_info.json", "w") as f:
-        json.dump(raw_info, f)
+    _add_clean_companies(raw_info)
+    _save_raw_info(raw_info)
+    _save_meta_info(total_posts, raw_info)
 
 
 if __name__ == "__main__":
