@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from datetime import datetime
 import json
 import re
@@ -45,6 +46,7 @@ def _preprocess_text(content: str) -> str:
     content = content.lower()
     content = re.sub(r"[\*\t\`]", " ", content)
     content = re.sub(r"\s+", " ", content).strip()
+    content = re.sub(r"\\u20b9", "Rs", content)
     content = content.split("\n")[0]
     return content
 
@@ -104,20 +106,20 @@ def _get_clean_yoe(yoe: str, clean_title: str, role: str) -> float:
             return 0.0
     for m in re.finditer(LABEL_SPECIFICATION["RE_YOE_CLEAN"], yoe):
         groups = m.groups()
-        return round(float(groups[0]) + (int(groups[4]) / 12 if groups[4] else 0), 2)
+        return round(float(groups[0]) + (int(groups[4]) / 12 if groups[4] else 0), 1)
     return -1.0
 
 
 def _get_clean_salary_for_india(salary: str) -> Tuple[float, str]:
     if "per month" in salary or "/month" in salary:
         for m in re.finditer(r"\d{4,6}", salary):
-            return (float(m.group()), "monthly")
+            return (int(float(m.group())), "monthly")
         for m in re.finditer(r"(\d{2})k ", salary):
-            return (float(m.groups()[0]) * 1000, "monthly")
+            return (int(float(m.groups()[0]) * 1000), "monthly")
     for m in re.finditer(LABEL_SPECIFICATION["RE_SALARY_CLEAN_LPA"], salary):
-        return (float(m.groups()[0]) * 1_00_000, "yearly")
+        return (int(float(m.groups()[0]) * 1_00_000), "yearly")
     for m in re.finditer(r"\d{6,7}", salary):
-        return (float(m.group()), "yearly")
+        return (int(float(m.group())), "yearly")
     return (-1, "yearly")
 
 
@@ -168,6 +170,8 @@ def parse_posts_and_save_tagged_info() -> None:
             companies = _find_matches(LABEL_SPECIFICATION["RE_COMPANY"], clean_content)
             roles = _find_matches(LABEL_SPECIFICATION["RE_ROLE"], clean_content)
             yoes = _find_matches(LABEL_SPECIFICATION["RE_YOE"], clean_content)
+            if r.id == "1744070":
+                print(clean_content)
             salaries = _find_matches(LABEL_SPECIFICATION["RE_SALARY"], clean_content)
             if companies and roles and yoes and salaries:
                 expanded_info = _get_info_as_flat_list(companies, roles, yoes, salaries, info)
@@ -188,7 +192,8 @@ def parse_posts_and_save_tagged_info() -> None:
                 n_dropped += 1
     # fmt: on
 
-    logger.info(f"Total posts: {total_posts}; N posts dropped: {n_dropped}")
+    logger.info(f"Total posts: {total_posts}")
+    logger.info(f"N posts dropped (missing data): {n_dropped}")
     _report(raw_info)
     raw_info = _filter_invalid_salaries(raw_info)
 
