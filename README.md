@@ -73,6 +73,7 @@ $ poetry shell
 
 ## Roadmap
 
+- Automate data refresh using aws lambda
 - Standardize `Company` and `Role`
 - Add `Total Comp`
 - Index `Company` and `Role` separately
