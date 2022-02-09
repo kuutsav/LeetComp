@@ -146,6 +146,5 @@ cython_debug/
 
 .cache
 *_backup.db
-locations.json
 posts_info.json
 inverted_index.json

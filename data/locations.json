@@ -1,0 +1,113 @@
+{
+    "india": {
+        "bangalore": "bangalore",
+        "bangaluru": "bangalore",
+        "banglore": "bangalore",
+        "bengalore": "bangalore",
+        "bengaluru": "bangalore",
+        "bnagalore": "bangalore",
+        "chennai": "bangalore",
+        "delhi": "delhi",
+        "gudgaon": "gurgaon",
+        "gurgaon": "gurgaon",
+        "gurgoan": "gurgaon",
+        "gurugram": "gurgaon",
+        "hyderabad": "hyderabad",
+        "hyderbad": "hyderabad",
+        "jaipur": "jaipur",
+        "kolkata": "kolkata",
+        "mohali": "mohali",
+        "mumbai": "mumbai",
+        "mysore": "mysore",
+        "new delhi": "delhi",
+        "noida": "noida",
+        "pune": "pune"
+    },
+    "usa": {
+        "arizona": "arizona",
+        "atlanta": "atlanta",
+        "austin": "austin",
+        "bay area": "san francisco",
+        "bellevue": "bellevue",
+        "bentonville": "bentonville",
+        "boston": "boston",
+        "cupertino": "cupertino",
+        "chicago": "chicago",
+        "dallas": "dallas",
+        "denver": "denver",
+        "detroit": "detroit",
+        "houston": "houston",
+        "irvine": "irvine",
+        "los angeles": "los angeles",
+        "mclean": "mclean",
+        "minneapolis": "minneapolis",
+        "mountain view": "mountain view",
+        "menlo park": "menlo park",
+        "nashville": "nashville",
+        "natick": "natick",
+        "new jersey": "new jersey",
+        "new york": "new york",
+        "newyork": "new york",
+        "ny": "new york",
+        "nyc": "new york",
+        "palo alto": "san francisco",
+        "plano": "plano",
+        "raleigh": "raleigh",
+        "redmond": "redmond",
+        "redwood city": "redwood city",
+        "san francisco": "san francisco",
+        "san jose": "san jose",
+        "santa clara": "santa clara",
+        "seattle": "seattle",
+        "sf": "san francisco",
+        "st louis": "st louis",
+        "sunnyvale": "sunnyvale",
+        "washington dc": "washington dc"
+    },
+    "uk": {
+        "cambridge": "cambridge",
+        "london": "london",
+        "newcastle": "newcastle",
+        "portsmouth": "portsmouth"
+    },
+    "canada": {
+        "montreal": "montreal",
+        "toronto": "toronto",
+        "vancouver": "vancouver"
+    },
+    "germany": {
+        "berlin": "berlin"
+    },
+    "singapore": {},
+    "netherlands": {
+        "amsterdam": "amsterdam"
+    },
+    "ireland": {
+        "dublin": "dublin"
+    },
+    "japan": {
+        "tokyo": "tokyo"
+    },
+    "spain": {
+        "barcelona": "barcelona",
+        "madrid": "madrid"
+    },
+    "luxembourg": {},
+    "thailand": {
+        "bangkok": "bangkok"
+    },
+    "scotland": {
+        "glasgow": "glasgow"
+    },
+    "vietnam": {},
+    "australia": {
+        "melbourne": "melbourne"
+    },
+    "taiwan": {},
+    "china": {
+        "shanghai": "shanghai"
+    },
+    "switzerland": {
+        "zurich": "zurich"
+    }
+}
