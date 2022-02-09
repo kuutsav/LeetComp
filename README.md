@@ -74,6 +74,7 @@ $ poetry shell
 - Standardize `Company` and `Role`
 - Add `Total Comp`
 - Index `Company` and `Role` separately
+- Add more charts, for e.g. chart to salary boxplots by yoe bins
 - Add data sorting capabilities
 - Trending companies
 - Improve page nav
