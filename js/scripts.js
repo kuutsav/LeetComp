@@ -41,9 +41,7 @@ function plotSalaryBarChartData() {
     var layout = {
         title: { text: '# salaries #', font: { size: 12 }},
         height: 400,
-        margin: {
-            t: 40, l: 0, r: 0
-        },
+        margin: { t: 80, l: 0, r: 0 },
         yaxis: { automargin: true },
         xaxis: { tickprefix: "₹ ", ticksuffix: " lpa" }
     };
@@ -69,9 +67,7 @@ function plotTopCompaniesChartData() {
       }];
     var layout = {
         title: { text: '# top companies (static list) #', font: { size: 12 }},
-        margin: {
-            t: 40
-        },
+        margin: { t: 80 },
         xaxis: { tickfont: {size: 8} },
     }
     Plotly.newPlot('topCompaniesBarChart', data, layout);
