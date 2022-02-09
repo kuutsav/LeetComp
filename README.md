@@ -1,6 +1,8 @@
-# LeetComp
+# [LeetComp](https://kuutsav.github.io/LeetComp/)
 
 Analyzing compensations mentioned on the Leetcode forums.
+
+> only supports posts from `India` at the moment
 
 ---
 
