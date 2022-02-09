@@ -187,6 +187,7 @@ def update_posts_content_info() -> None:
                 post.content = post_content
             if ix % 10 == 0:
                 logger.info(f"PostID {post_id}; {ix:>3}/{len(post_ids_without_content)} posts done")
+        logger.info("All posts synced")
     except KeyboardInterrupt:
         session.commit()
         session.close()

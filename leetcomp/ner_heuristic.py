@@ -136,7 +136,7 @@ def _is_valid_monthly_internship_pay_from_india(base_pay: float):
     return base_pay >= INTERN_SALARY_RANGE_INDIA[0] and base_pay <= INTERN_SALARY_RANGE_INDIA[1]
 
 
-def _filter_for_correct_fixed_salary_for_india(raw_info: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def _filter_invalid_salaries(raw_info: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     n_india = 0
     n_dropped = 0
     filtered_info = []
@@ -151,7 +151,7 @@ def _filter_for_correct_fixed_salary_for_india(raw_info: List[Dict[str, Any]]) -
                 continue
             else:
                 filtered_info.append(r)
-    logger.info(f"Removed {n_dropped} records out of {n_india} from India based on the valid Base Pay range")
+    logger.info(f"Dropped {n_dropped}/{n_india} records due to invalid pay")
     return filtered_info
 
 
@@ -190,7 +190,7 @@ def parse_posts_and_save_tagged_info() -> None:
 
     logger.info(f"Total posts: {total_posts}; N posts dropped: {n_dropped}")
     _report(raw_info)
-    raw_info = _filter_for_correct_fixed_salary_for_india(raw_info)
+    raw_info = _filter_invalid_salaries(raw_info)
 
     raw_info = sorted(raw_info, key=lambda x: x["date"], reverse=True)
     with open("data/posts_info.json", "w") as f:
