@@ -173,8 +173,19 @@ function makeFullTimeButton() {
 // Search
 function filterSearchIndexes(ixs) {
     window.data = [];
-    for (i = 0; i < ixs.length; i++) {
-        window.data.push(allData[ixs[i]]);
+    if (document.getElementById("fullTimeButton").classList.contains("active")) {
+        for (i = 0; i < ixs.length; i++) {
+            if (allData[ixs[i]]["yrOrPm"] == "yearly") {
+                window.data.push(allData[ixs[i]]);
+            }
+        }
+    }
+    else if (document.getElementById("internshipButton").classList.contains("active")) {
+        for (i = 0; i < ixs.length; i++) {
+            if (allData[ixs[i]]["yrOrPm"] == "monthly") {
+                window.data.push(allData[ixs[i]]);
+            }
+        }
     }
 }
 
