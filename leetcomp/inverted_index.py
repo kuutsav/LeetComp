@@ -60,6 +60,9 @@ def build_inverted_index() -> None:
     with open("data/inverted_index.json", "w") as f:
         json.dump(inverted_index, f)
 
+    with open("js/data.js", "a") as f:
+        f.write(f"\n\nvar invertedIndex = {json.dumps(inverted_index)};")
+
 
 if __name__ == "__main__":
     build_inverted_index()

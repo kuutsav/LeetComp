@@ -319,3 +319,47 @@ for (i = 0; i < metaInfo["mostOffersInLastMonth"].length; i++) {
 document.getElementById("stats").innerHTML = "Total Posts: " + metaInfo["totalPosts"]
     + " | Posts from India: " + metaInfo["totalPostsFromIndia"]
     + " | Last updated: " + metaInfo["lastUpdated"]
+
+
+// Sorting by salary
+var sortedAsc = false;
+
+function compareObjectsAsc(object1, object2, key) {
+    const obj1 = object1[key];
+    const obj2 = object2[key];
+    if (obj1 < obj2) {
+        return -1;
+    }
+    if (obj1 > obj2) {
+        return 1;
+    }
+    return 0
+}
+
+function compareObjectsDesc(object1, object2, key) {
+    const obj1 = object1[key];
+    const obj2 = object2[key];
+    if (obj1 > obj2) {
+        return -1;
+    }
+    if (obj1 < obj2) {
+        return 1;
+    }
+    return 0
+}
+
+function sortBySalary(e) {
+    if (sortedAsc == false) {
+        data.sort((post1, post2) => {
+            return compareObjectsAsc(post1, post2, e.id);
+        });
+        sortedAsc = true;
+    }
+    else {
+        data.sort((post1, post2) => {
+            return compareObjectsDesc(post1, post2, e.id);
+        });
+        sortedAsc = false;
+    }
+    resetData();
+}

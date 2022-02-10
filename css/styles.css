@@ -69,3 +69,7 @@
   margin-bottom: -10;
   text-align: center;
 }
+
+.sortButton {
+  cursor: pointer;
+}

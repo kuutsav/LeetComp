@@ -121,10 +121,10 @@ def _get_clean_salary_for_india(salary: str) -> Tuple[float, str]:
             return (int(float(m.group())), "monthly")
         for m in re.finditer(r"(\d{2})k ", salary):
             return (int(float(m.groups()[0]) * 1000), "monthly")
-    for m in re.finditer(LABEL_SPECIFICATION["RE_SALARY_CLEAN_LPA"], salary):
-        return (int(float(m.groups()[0]) * 1_00_000), "yearly")
     for m in re.finditer(r"\d{6,7}", salary):
         return (int(float(m.group())), "yearly")
+    for m in re.finditer(LABEL_SPECIFICATION["RE_SALARY_CLEAN_LPA"], salary):
+        return (int(float(m.groups()[0]) * 1_00_000), "yearly")
     return (-1, "yearly")
 
 
@@ -180,12 +180,11 @@ def _add_clean_companies(raw_info: List[Dict[str, Any]]) -> None:
 
 
 def _save_raw_info(raw_info: List[Dict[str, Any]]) -> None:
-    raw_info = sorted(raw_info, key=lambda x: x["date"], reverse=True)
     with open("data/posts_info.json", "w") as f:
         json.dump(raw_info, f)
 
 
-def _save_meta_info(total_posts: int, raw_info: List[Dict[str, Any]]) -> None:
+def _save_meta_info(total_posts: int, raw_info: List[Dict[str, Any]]) -> Dict[str, Any]:
     # top 20 companies
     company_counter = Counter([r["cleanCompany"] for r in raw_info])
     top_20 = [(company, count) for company, count in company_counter.most_common(20)]
@@ -204,6 +203,14 @@ def _save_meta_info(total_posts: int, raw_info: List[Dict[str, Any]]) -> None:
     }
     with open("data/meta_info.json", "w") as f:
         json.dump(meta_info, f)
+
+    return meta_info
+
+
+def _update_data_in_js(raw_info: List[Dict[str, Any]], meta_info: Dict[str, Any]) -> None:
+    with open("js/data.js", "w") as f:
+        f.write(f"var metaInfo = {json.dumps(meta_info)};\n\n")
+        f.write(f"var allData = {json.dumps(raw_info)};")
 
 
 def parse_posts_and_save_tagged_info() -> None:
@@ -231,9 +238,14 @@ def parse_posts_and_save_tagged_info() -> None:
                         info["yoe"].lower(), _preprocess_text(r.title).lower(), info["role"].lower()
                     )
                     if "country" in info and info["country"] == "india":
-                        info["cleanSalary"], info["yrOrPm"] = _get_clean_salary_for_india(
-                            info["salary"].replace(",", "").lower()
-                        )
+                        if "\\n" in info["salary"].replace(",", "").lower():
+                            info["cleanSalary"], info["yrOrPm"] = _get_clean_salary_for_india(
+                                info["salary"].replace(",", "").lower().split("\\n")[0]
+                            )
+                        else:
+                            info["cleanSalary"], info["yrOrPm"] = _get_clean_salary_for_india(
+                                info["salary"].replace(",", "").lower()
+                            )
                 raw_info += expanded_info
             else:
                 n_dropped += 1
@@ -245,8 +257,10 @@ def parse_posts_and_save_tagged_info() -> None:
     raw_info = _filter_invalid_salaries(raw_info)
 
     _add_clean_companies(raw_info)
+    raw_info = sorted(raw_info, key=lambda x: x["date"], reverse=True)
     _save_raw_info(raw_info)
-    _save_meta_info(total_posts, raw_info)
+    meta_info = _save_meta_info(total_posts, raw_info)
+    _update_data_in_js(raw_info, meta_info)
 
 
 if __name__ == "__main__":
