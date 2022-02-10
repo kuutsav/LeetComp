@@ -6,7 +6,8 @@
     <title>LeetComp: Analyzing compensations from leetcode.com</title>
     <meta name="LeetComp" content="Leetcode compensations analyzed.">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <link rel="stylesheet" href="css/styles.css">
 </head>
 
@@ -15,22 +16,26 @@
         <h1 id="leetComp" class="col">💸 LeetComp 💸</h1>
         <div style="text-align: center;">
             <a href="https://github.com/kuutsav/LeetComp/stargazers">
-                <img alt="star this repo" src="https://githubbadges.com/star.svg?user=kuutsav&repo=LeetComp&style=default">
+                <img alt="star this repo"
+                    src="https://githubbadges.com/star.svg?user=kuutsav&repo=LeetComp&style=default">
             </a>
             <a href="https://github.com/kuutsav/LeetComp/fork">
-                <img alt="fork this repo" src="https://githubbadges.com/fork.svg?user=kuutsav&repo=LeetComp&style=default">
+                <img alt="fork this repo"
+                    src="https://githubbadges.com/fork.svg?user=kuutsav&repo=LeetComp&style=default">
             </a>
         </div>
         <hr>
         <div class="row">
-            <div id="salaryBarChart" class="col-6">
+            <div id="salaryBarChart">
                 <!-- Salary bar chart -->
             </div>
-            <div id="salaryYoeBinsChart" class="col-3">
-                <!-- Salary bar chart -->
+        </div>
+        <div class="row">
+            <div id="salaryYoeBinsChart" class="col-6">
+                <!-- Yoe salary bins box plots -->
             </div>
-            <div id="topCompaniesBarChart" class="col-3">
-                <!-- Salary bar chart -->
+            <div id="topCompaniesBarChart" class="col-6">
+                <!-- Top companies bar chart -->
             </div>
         </div>
         <div id="mostOffersTitle">📈 Most offers in the last 30 days (static list)</div>
@@ -52,9 +57,9 @@
             </div>
             <div class="col-auto mr-auto">
                 <input type="search" class="form-control-sm rounded" placeholder="min yoe" aria-label="minYoe"
-                aria-describedby="min-yoe" id="minYoe" onkeyup="minYoeFilter(this)"/> -
+                    aria-describedby="min-yoe" id="minYoe" onkeyup="minYoeFilter(this)" /> -
                 <input type="search" class="form-control-sm rounded" placeholder="max yoe" aria-label="maxYoe"
-                aria-describedby="max-yoe" id="maxYoe" onkeyup="maxYoeFilter(this)"/>
+                    aria-describedby="max-yoe" id="maxYoe" onkeyup="maxYoeFilter(this)" />
             </div>
             <div class="col-auto mr-auto text-muted" id="nRows"></div>
             <nav aria-label="Page navigation example" class="col-auto ms-auto">
@@ -100,21 +105,24 @@
         </table>
         <div id="stats"></div>
         <hr>
-        <script src="https://utteranc.es/client.js" repo="kuutsav/LeetComp" issue-term="pathname" label="comments" theme="github-light" crossorigin="anonymous" async></script>
+        <script src="https://utteranc.es/client.js" repo="kuutsav/LeetComp" issue-term="pathname" label="comments"
+            theme="github-light" crossorigin="anonymous" async></script>
     </div>
 
     <script src="js/data.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
     <script src="https://cdn.plot.ly/plotly-2.8.3.min.js"></script>
     <script src="js/scripts.js"></script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-G5Y6PERW9N"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
+        function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
         gtag('config', 'G-G5Y6PERW9N');
     </script>
-</script>
+    </script>
 </body>
 
 </html>

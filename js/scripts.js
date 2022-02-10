@@ -41,7 +41,7 @@ function plotSalaryBarChartData() {
     var layout = {
         title: { text: "# salaries #", font: { size: 12 } },
         height: 400,
-        margin: { t: 80, l: 0, r: 0 },
+        margin: { t: 20, l: 0, r: 0 },
         yaxis: { automargin: true },
         xaxis: { tickprefix: "₹ ", ticksuffix: " lpa" }
     };
@@ -53,7 +53,7 @@ plotSalaryBarChartData();
 function plotTopCompaniesChartData() {
     var companies = [];
     var counts = [];
-    for (i = 0; i < metaInfo["top20Companies"].length; i++){
+    for (i = 0; i < metaInfo["top20Companies"].length; i++) {
         companies.push(metaInfo["top20Companies"][i][0])
         counts.push(metaInfo["top20Companies"][i][1])
     }
@@ -64,11 +64,12 @@ function plotTopCompaniesChartData() {
         orientation: "v",
         opacity: 0.5,
         marker: { color: "green" }
-      }];
+    }];
     var layout = {
-        title: { text: "# top companies (static list) #", font: { size: 12 } },
-        margin: { t: 80, l: 25 },
-        xaxis: { tickfont: { size: 8 } },
+        title: { text: "# top companies (static) #", font: { size: 12 } },
+        margin: { t: 20, l: 25 },
+        xaxis: { tickfont: { size: 10 } },
+        showlegend: false
     }
     Plotly.newPlot("topCompaniesBarChart", data, layout);
 }
@@ -129,8 +130,8 @@ function plotSalaryYoeBinsChart() {
         marker: { color: "green" }
     };
     var layout = {
-        title: { text: "# yoe bins #", font: { size: 12 } }, margin: { t: 80, b: 70 },
-        xaxis: { tickfont: { size: 8 } },
+        title: { text: "# yoe bins #", font: { size: 12 } }, margin: { t: 20, l: 30 },
+        xaxis: { tickfont: { size: 10 } },
         showlegend: false
     }
 
@@ -310,11 +311,11 @@ const maxYoeFilter = debounce((e) => _maxYoeFilter(e));
 document.getElementById("mostOffers").innerHTML = ""
 for (i = 0; i < metaInfo["mostOffersInLastMonth"].length; i++) {
     cc = metaInfo["mostOffersInLastMonth"][i]
-    document.getElementById("mostOffers").innerHTML  += "<div class='col'>"
-    + cc[0] + "(" + cc[1] + ")" + "</div>"
+    document.getElementById("mostOffers").innerHTML += "<div class='col'>"
+        + cc[0] + "(" + cc[1] + ")" + "</div>"
 }
 
 // Stats
 document.getElementById("stats").innerHTML = "Total Posts: " + metaInfo["totalPosts"]
-+ " | Posts from India: " + metaInfo["totalPostsFromIndia"]
-+ " | Last updated: " + metaInfo["lastUpdated"]
+    + " | Posts from India: " + metaInfo["totalPostsFromIndia"]
+    + " | Last updated: " + metaInfo["lastUpdated"]
