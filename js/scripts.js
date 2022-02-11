@@ -78,16 +78,16 @@ plotTopCompaniesChartData();
 function plotSalaryYoeBinsChart() {
     var yoeBin1 = []; var yoeBin2 = []; var yoeBin3 = []; var yoeBin4 = []; var yoeBin5 = [];
     for (i = 0; i < data.length; i++) {
-        if (data[i]["cleanYoe"] >= 0 & data[i]["cleanYoe"] < 1) {
+        if (data[i]["cleanYoe"] >= 0 && data[i]["cleanYoe"] < 1) {
             yoeBin1.push(data[i]["cleanSalary"]);
         }
-        else if (data[i]["cleanYoe"] >= 1 & data[i]["cleanYoe"] < 3) {
+        else if (data[i]["cleanYoe"] >= 1 && data[i]["cleanYoe"] < 3) {
             yoeBin2.push(data[i]["cleanSalary"]);
         }
-        else if (data[i]["cleanYoe"] >= 3 & data[i]["cleanYoe"] < 6) {
+        else if (data[i]["cleanYoe"] >= 3 && data[i]["cleanYoe"] < 6) {
             yoeBin3.push(data[i]["cleanSalary"]);
         }
-        else if (data[i]["cleanYoe"] >= 6 & data[i]["cleanYoe"] < 9) {
+        else if (data[i]["cleanYoe"] >= 6 && data[i]["cleanYoe"] < 9) {
             yoeBin4.push(data[i]["cleanSalary"]);
         }
         else if (data[i]["cleanYoe"] >= 9) {
@@ -291,15 +291,21 @@ function _yoeFilter(e) {
     minYoe = document.getElementById("minYoe").value;
     maxYoe = document.getElementById("maxYoe").value;
     if (minYoe.length == 0) {
-        minYoe = 0;
+        minYoe = -0.99;
+    }
+    else {
+        minYoe = parseFloat(minYoe)
     }
     if (maxYoe.length == 0) {
-        maxYoe = 30;
+        maxYoe = 30.0;
+    }
+    else {
+        maxYoe = parseFloat(maxYoe)
     }
     window.data = [];
     for (i = 0; i < allData.length; i++) {
-        yoe = parseFloat(allData[i]["yoe"]);
-        if ((yoe >= parseFloat(minYoe)) & (yoe <= parseFloat(maxYoe))) {
+        yoe = parseFloat(allData[i]["cleanYoe"]);
+        if (yoe >= minYoe && yoe <= maxYoe) {
             window.data.push(allData[i]);
         }
     }
