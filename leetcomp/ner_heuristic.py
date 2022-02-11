@@ -149,7 +149,7 @@ def _is_valid_monthly_internship_pay_from_india(base_pay: float):
     return base_pay >= INTERN_SALARY_RANGE_INDIA[0] and base_pay <= INTERN_SALARY_RANGE_INDIA[1]
 
 
-def _is_valid_monthly_total_pay_from_india(base_pay: float):
+def _is_valid_yearly_total_pay_from_india(base_pay: float):
     return base_pay >= TOTAL_SALARY_RANGE_INDIA[0] and base_pay <= TOTAL_SALARY_RANGE_INDIA[1]
 
 
@@ -161,11 +161,10 @@ def _filter_invalid_salaries(raw_info: List[Dict[str, Any]]) -> List[Dict[str, A
         if "country" in r and r["country"] == "india":
             n_india += 1
             if "cleanSalaryTotal" in r and r["cleanSalaryTotal"] != -1:
-                if not _is_valid_monthly_total_pay_from_india(r["cleanSalaryTotal"]):
+                if not _is_valid_yearly_total_pay_from_india(r["cleanSalaryTotal"]):
                     r["cleanSalaryTotal"] = -1.0
                 elif r["cleanSalaryTotal"] / r["cleanSalary"] > TOTAL_TO_BASE_MAX_RATIO:
                     r["cleanSalaryTotal"] = -1.0
-
             if r["yrOrPm"] == "yearly" and not _is_valid_yearly_base_pay_from_india(r["cleanSalary"]):
                 n_dropped += 1
                 continue
