@@ -285,27 +285,27 @@ function search(e) {
 }
 const searchText = debounce((e) => search(e));
 
-function _minYoeFilter(e) {
-    window.data = [];
-    for (i = 0; i < allData.length; i++) {
-        if (allData[i]["yoe"] >= parseFloat(e.value)) {
-            window.data.push(allData[i]);
-        }
-    }
-    resetData();
-}
-const minYoeFilter = debounce((e) => _minYoeFilter(e));
 
-function _maxYoeFilter(e) {
+// Min-Max Yoe
+function _yoeFilter(e) {
+    minYoe = document.getElementById("minYoe").value;
+    maxYoe = document.getElementById("maxYoe").value;
+    if (minYoe.length == 0) {
+        minYoe = 0;
+    }
+    if (maxYoe.length == 0) {
+        maxYoe = 30;
+    }
     window.data = [];
     for (i = 0; i < allData.length; i++) {
-        if (allData[i]["yoe"] <= parseFloat(e.value)) {
+        yoe = parseFloat(allData[i]["yoe"]);
+        if ((yoe >= parseFloat(minYoe)) & (yoe <= parseFloat(maxYoe))) {
             window.data.push(allData[i]);
         }
     }
     resetData();
 }
-const maxYoeFilter = debounce((e) => _maxYoeFilter(e));
+const yoeFilter = debounce((e) => _yoeFilter(e));
 
 // Most offers
 document.getElementById("mostOffers").innerHTML = ""
