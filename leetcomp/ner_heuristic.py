@@ -210,7 +210,9 @@ def _save_meta_info(total_posts: int, raw_info: List[Dict[str, Any]]) -> Dict[st
 def _update_data_in_js(raw_info: List[Dict[str, Any]], meta_info: Dict[str, Any]) -> None:
     with open("js/data.js", "w") as f:
         f.write(f"var metaInfo = {json.dumps(meta_info)};\n\n")
-        f.write(f"var allData = {json.dumps(raw_info)};")
+        # we are only saving the values here to reduce data size and save network cost
+        # when client loads the static content
+        f.write(f"var allData = {json.dumps([list(r.values()) for r in raw_info])};")
 
 
 def parse_posts_and_save_tagged_info() -> None:

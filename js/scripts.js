@@ -1,6 +1,23 @@
 // Data
 var data = [];
 
+// Data ix and key (we dropped the keys to reduce data size and save network cost)
+// 0="id"
+// 1="title"
+// 2="voteCount",
+// 3="viewCount"
+// 4="date"
+// 5="company"
+// 6="role"
+// 7="yoe"
+// 8="salary"
+// 9="city"
+// 10="country"
+// 11="cleanYoe"
+// 12="cleanSalary"
+// 13="yrOrPm"
+// 14="cleanCompany"
+
 // Constants
 var pageSize = 25;
 var nPages = Math.ceil(data.length / pageSize);
@@ -8,7 +25,7 @@ var nPages = Math.ceil(data.length / pageSize);
 function setFullTimeOrInternship(yrOrPm) {
     window.data = [];
     for (i = 0; i < allData.length; i++) {
-        if (allData[i]["yrOrPm"] == yrOrPm) {
+        if (allData[i][13] == yrOrPm) {
             window.data.push(allData[i]);
         }
     }
@@ -25,7 +42,7 @@ var tableTbodyRef = document.getElementById("postInfo").getElementsByTagName("tb
 function getAllBaseSalaries() {
     var salaries = [];
     for (i = 0; i < data.length; i++) {
-        salaries.push(data[i]["cleanSalary"] / 100000)
+        salaries.push(data[i][12] / 100000)
     }
     return salaries;
 }
@@ -78,20 +95,20 @@ plotTopCompaniesChartData();
 function plotSalaryYoeBinsChart() {
     var yoeBin1 = []; var yoeBin2 = []; var yoeBin3 = []; var yoeBin4 = []; var yoeBin5 = [];
     for (i = 0; i < data.length; i++) {
-        if (data[i]["cleanYoe"] >= 0 && data[i]["cleanYoe"] < 1) {
-            yoeBin1.push(data[i]["cleanSalary"]);
+        if (data[i][11] >= 0 && data[i][11] < 1) {
+            yoeBin1.push(data[i][12]);
         }
-        else if (data[i]["cleanYoe"] >= 1 && data[i]["cleanYoe"] < 3) {
-            yoeBin2.push(data[i]["cleanSalary"]);
+        else if (data[i][11] >= 1 && data[i][11] < 3) {
+            yoeBin2.push(data[i][12]);
         }
-        else if (data[i]["cleanYoe"] >= 3 && data[i]["cleanYoe"] < 6) {
-            yoeBin3.push(data[i]["cleanSalary"]);
+        else if (data[i][11] >= 3 && data[i][11] < 6) {
+            yoeBin3.push(data[i][12]);
         }
-        else if (data[i]["cleanYoe"] >= 6 && data[i]["cleanYoe"] < 9) {
-            yoeBin4.push(data[i]["cleanSalary"]);
+        else if (data[i][11] >= 6 && data[i][11] < 9) {
+            yoeBin4.push(data[i][12]);
         }
-        else if (data[i]["cleanYoe"] >= 9) {
-            yoeBin5.push(data[i]["cleanSalary"]);
+        else if (data[i][11] >= 9) {
+            yoeBin5.push(data[i][12]);
         }
     }
     var trace1 = {
@@ -154,14 +171,14 @@ function updatePostsTableContent(startIndex, endIndex) {
     var myHtmlContent = "";
     endIndex = Math.min(data.length, endIndex)
     for (var i = startIndex; i < endIndex; i++) {
-        myHtmlContent += "<tr><td>" + data[i]["company"] + "</td>";
-        myHtmlContent += "<td>" + data[i]["role"].toLowerCase() + "</td>";
-        myHtmlContent += "<td>" + getFormattedYoe(data[i]["cleanYoe"]) + "</td>";
-        myHtmlContent += "<td>₹ " + data[i]["cleanSalary"].toLocaleString("en-IN") + "</td>";
-        myHtmlContent += "<td>" + data[i]["date"] + "</td>";
-        myHtmlContent += "<td>" + data[i]["viewCount"] + "</td>";
-        myHtmlContent += "<td>" + data[i]["voteCount"] + "</td>";
-        myHtmlContent += "<td>" + data[i]["id"] + "</td></tr>";
+        myHtmlContent += "<tr><td>" + data[i][5] + "</td>";
+        myHtmlContent += "<td>" + data[i][6].toLowerCase() + "</td>";
+        myHtmlContent += "<td>" + getFormattedYoe(data[i][11]) + "</td>";
+        myHtmlContent += "<td>₹ " + data[i][12].toLocaleString("en-IN") + "</td>";
+        myHtmlContent += "<td>" + data[i][4] + "</td>";
+        myHtmlContent += "<td>" + data[i][3] + "</td>";
+        myHtmlContent += "<td>" + data[i][2] + "</td>";
+        myHtmlContent += "<td>" + data[i][0] + "</td></tr>";
     }
     tableTbodyRef.innerHTML = myHtmlContent;
 };
@@ -242,14 +259,14 @@ function filterSearchIndexes(ixs) {
     window.data = [];
     if (document.getElementById("fullTimeButton").classList.contains("active")) {
         for (i = 0; i < ixs.length; i++) {
-            if (allData[ixs[i]]["yrOrPm"] == "yearly") {
+            if (allData[ixs[i]][13] == "yearly") {
                 window.data.push(allData[ixs[i]]);
             }
         }
     }
     else if (document.getElementById("internshipButton").classList.contains("active")) {
         for (i = 0; i < ixs.length; i++) {
-            if (allData[ixs[i]]["yrOrPm"] == "monthly") {
+            if (allData[ixs[i]][13] == "monthly") {
                 window.data.push(allData[ixs[i]]);
             }
         }
@@ -304,7 +321,7 @@ function _yoeFilter(e) {
     }
     window.data = [];
     for (i = 0; i < allData.length; i++) {
-        yoe = parseFloat(allData[i]["cleanYoe"]);
+        yoe = parseFloat(allData[i][11]);
         if (yoe >= minYoe && yoe <= maxYoe) {
             window.data.push(allData[i]);
         }
