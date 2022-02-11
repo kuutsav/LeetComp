@@ -2,21 +2,11 @@
 var data = [];
 
 // Data ix and key (we dropped the keys to reduce data size and save network cost)
-// 0="id"
-// 1="title"
-// 2="voteCount",
-// 3="viewCount"
-// 4="date"
-// 5="company"
-// 6="role"
-// 7="yoe"
-// 8="salary"
-// 9="city"
-// 10="country"
-// 11="cleanYoe"
-// 12="cleanSalary"
-// 13="yrOrPm"
-// 14="cleanCompany"
+keyMap = {
+    "id": 0, "title": 1, "voteCount": 2, "viewCount": 3, "date": 4, "company": 5,
+    "role": 6, "yoe": 7, "salary": 8, "city": 9, "country": 10, "cleanYoe": 11, "cleanSalary": 12,
+    "yrOrPm": 13, "cleanCompany": 14
+}
 
 // Constants
 var pageSize = 25;
@@ -348,8 +338,8 @@ document.getElementById("stats").innerHTML = "Total Posts: " + metaInfo["totalPo
 var sortedAsc = false;
 
 function compareObjectsAsc(object1, object2, key) {
-    const obj1 = object1[key];
-    const obj2 = object2[key];
+    const obj1 = object1[keyMap[key]];
+    const obj2 = object2[keyMap[key]];
     if (obj1 < obj2) {
         return -1;
     }
@@ -360,8 +350,8 @@ function compareObjectsAsc(object1, object2, key) {
 }
 
 function compareObjectsDesc(object1, object2, key) {
-    const obj1 = object1[key];
-    const obj2 = object2[key];
+    const obj1 = object1[keyMap[key]];
+    const obj2 = object2[keyMap[key]];
     if (obj1 > obj2) {
         return -1;
     }
