@@ -3,19 +3,18 @@ var data = [];
 
 // Data ix and key (we dropped the keys to reduce data size and save network cost)
 keyMap = {
-    "id": 0, "title": 1, "voteCount": 2, "viewCount": 3, "date": 4, "company": 5,
-    "role": 6, "yoe": 7, "salary": 8, "city": 9, "country": 10, "cleanYoe": 11, "cleanSalary": 12,
-    "yrOrPm": 13, "cleanCompany": 14
+    "id": 0, "voteCount": 1, "viewCount": 2, "date": 3, "company": 4, "role": 5,
+    "cleanYoe": 6, "cleanSalary": 7, "yrOrPm": 8, "cleanSalaryTotal": 9, "cleanCompany": 10
 }
 
 // Constants
-var pageSize = 25;
+var pageSize = 20;
 var nPages = Math.ceil(data.length / pageSize);
 
 function setFullTimeOrInternship(yrOrPm) {
     window.data = [];
     for (i = 0; i < allData.length; i++) {
-        if (allData[i][13] == yrOrPm) {
+        if (allData[i][keyMap["yrOrPm"]] == yrOrPm) {
             window.data.push(allData[i]);
         }
     }
@@ -32,18 +31,37 @@ var tableTbodyRef = document.getElementById("postInfo").getElementsByTagName("tb
 function getAllBaseSalaries() {
     var salaries = [];
     for (i = 0; i < data.length; i++) {
-        salaries.push(data[i][12] / 100000)
+        salaries.push(data[i][keyMap["cleanSalary"]] / 100000)
+    }
+    return salaries;
+}
+
+function getAllTotalSalaries() {
+    var salaries = [];
+    for (i = 0; i < data.length; i++) {
+        if (data[i][keyMap["cleanSalaryTotal"]] != -1) {
+            salaries.push(data[i][keyMap["cleanSalaryTotal"]] / 100000);
+        }
     }
     return salaries;
 }
 
 function plotSalaryBarChartData() {
     salaries = getAllBaseSalaries();
-    var trace = {
+    totalSalaries = getAllTotalSalaries();
+    var trace1 = {
         x: salaries,
+        name: "base",
         type: "histogram",
         opacity: 0.5,
         marker: { color: "green" }
+    };
+    var trace2 = {
+        x: totalSalaries,
+        name: "total",
+        type: "histogram",
+        opacity: 0.5,
+        marker: { color: "red" }
     };
     var layout = {
         title: { text: "# salaries #", font: { size: 12 } },
@@ -52,7 +70,7 @@ function plotSalaryBarChartData() {
         yaxis: { automargin: true },
         xaxis: { tickprefix: "₹ ", ticksuffix: " lpa" }
     };
-    var salaryBarChart = [trace];
+    var salaryBarChart = [trace1, trace2];
     Plotly.newPlot("salaryBarChart", salaryBarChart, layout);
 }
 plotSalaryBarChartData();
@@ -85,20 +103,20 @@ plotTopCompaniesChartData();
 function plotSalaryYoeBinsChart() {
     var yoeBin1 = []; var yoeBin2 = []; var yoeBin3 = []; var yoeBin4 = []; var yoeBin5 = [];
     for (i = 0; i < data.length; i++) {
-        if (data[i][11] >= 0 && data[i][11] < 1) {
-            yoeBin1.push(data[i][12]);
+        if (data[i][keyMap["cleanYoe"]] >= 0 && data[i][keyMap["cleanYoe"]] < 1) {
+            yoeBin1.push(data[i][keyMap["cleanSalary"]]);
         }
-        else if (data[i][11] >= 1 && data[i][11] < 3) {
-            yoeBin2.push(data[i][12]);
+        else if (data[i][keyMap["cleanYoe"]] >= 1 && data[i][keyMap["cleanYoe"]] < 3) {
+            yoeBin2.push(data[i][keyMap["cleanSalary"]]);
         }
-        else if (data[i][11] >= 3 && data[i][11] < 6) {
-            yoeBin3.push(data[i][12]);
+        else if (data[i][keyMap["cleanYoe"]] >= 3 && data[i][keyMap["cleanYoe"]] < 6) {
+            yoeBin3.push(data[i][keyMap["cleanSalary"]]);
         }
-        else if (data[i][11] >= 6 && data[i][11] < 9) {
-            yoeBin4.push(data[i][12]);
+        else if (data[i][keyMap["cleanYoe"]] >= 6 && data[i][keyMap["cleanYoe"]] < 9) {
+            yoeBin4.push(data[i][keyMap["cleanSalary"]]);
         }
-        else if (data[i][11] >= 9) {
-            yoeBin5.push(data[i][12]);
+        else if (data[i][keyMap["cleanYoe"]] >= 9) {
+            yoeBin5.push(data[i][keyMap["cleanSalary"]]);
         }
     }
     var trace1 = {
@@ -156,19 +174,29 @@ function getFormattedYoe(yoe) {
     }
 }
 
+function getFormattedTotalSalary(totalSalary) {
+    if (totalSalary == -1) {
+        return "<button class='btn-danger'>n/a</button>";
+    }
+    else {
+        return "₹ " + totalSalary.toLocaleString("en-IN");
+    }
+}
+
 // Add rows to the postInfo table
 function updatePostsTableContent(startIndex, endIndex) {
     var myHtmlContent = "";
     endIndex = Math.min(data.length, endIndex)
     for (var i = startIndex; i < endIndex; i++) {
-        myHtmlContent += "<tr><td>" + data[i][5] + "</td>";
-        myHtmlContent += "<td>" + data[i][6].toLowerCase() + "</td>";
-        myHtmlContent += "<td>" + getFormattedYoe(data[i][11]) + "</td>";
-        myHtmlContent += "<td>₹ " + data[i][12].toLocaleString("en-IN") + "</td>";
-        myHtmlContent += "<td>" + data[i][4] + "</td>";
-        myHtmlContent += "<td>" + data[i][3] + "</td>";
-        myHtmlContent += "<td>" + data[i][2] + "</td>";
-        myHtmlContent += "<td>" + data[i][0] + "</td></tr>";
+        myHtmlContent += "<tr><td>" + data[i][keyMap["company"]] + "</td>";
+        myHtmlContent += "<td>" + data[i][keyMap["role"]].toLowerCase() + "</td>";
+        myHtmlContent += "<td>" + getFormattedYoe(data[i][keyMap["cleanYoe"]]) + "</td>";
+        myHtmlContent += "<td>base: ₹ " + data[i][keyMap["cleanSalary"]].toLocaleString("en-IN");
+        myHtmlContent += "<br>total: " + getFormattedTotalSalary(data[i][keyMap["cleanSalaryTotal"]]) + "</td>";
+        myHtmlContent += "<td>" + data[i][keyMap["date"]] + "</td>";
+        myHtmlContent += "<td>" + data[i][keyMap["viewCount"]] + "</td>";
+        myHtmlContent += "<td>" + data[i][keyMap["voteCount"]] + "</td>";
+        myHtmlContent += "<td>" + data[i][keyMap["id"]] + "</td></tr>";
     }
     tableTbodyRef.innerHTML = myHtmlContent;
 };
@@ -249,14 +277,14 @@ function filterSearchIndexes(ixs) {
     window.data = [];
     if (document.getElementById("fullTimeButton").classList.contains("active")) {
         for (i = 0; i < ixs.length; i++) {
-            if (allData[ixs[i]][13] == "yearly") {
+            if (allData[ixs[i]][keyMap["yrOrPm"]] == "yearly") {
                 window.data.push(allData[ixs[i]]);
             }
         }
     }
     else if (document.getElementById("internshipButton").classList.contains("active")) {
         for (i = 0; i < ixs.length; i++) {
-            if (allData[ixs[i]][13] == "monthly") {
+            if (allData[ixs[i]][keyMap["yrOrPm"]] == "monthly") {
                 window.data.push(allData[ixs[i]]);
             }
         }
@@ -311,7 +339,7 @@ function _yoeFilter(e) {
     }
     window.data = [];
     for (i = 0; i < allData.length; i++) {
-        yoe = parseFloat(allData[i][11]);
+        yoe = parseFloat(allData[i][keyMap["cleanYoe"]]);
         if (yoe >= minYoe && yoe <= maxYoe) {
             window.data.push(allData[i]);
         }
@@ -331,6 +359,7 @@ for (i = 0; i < metaInfo["mostOffersInLastMonth"].length; i++) {
 // Stats
 document.getElementById("stats").innerHTML = "Total Posts: " + metaInfo["totalPosts"]
     + " | Posts from India: " + metaInfo["totalPostsFromIndia"]
+    + " | Posts with Total Comp: " + metaInfo["totalPostsWithTotalComp"]
     + " | Last updated: " + metaInfo["lastUpdated"]
 
 

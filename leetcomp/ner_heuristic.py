@@ -11,6 +11,8 @@ from leetcomp.utils import session_scope
 
 
 BASE_SALARY_RANGE_INDIA = (2_00_000, 100_00_000)
+TOTAL_SALARY_RANGE_INDIA = (2_00_000, 200_00_000)
+TOTAL_TO_BASE_MAX_RATIO = 2.5
 INTERN_SALARY_RANGE_INDIA = (10_000, 2_00_000)
 
 LABEL_SPECIFICATION = {
@@ -24,7 +26,7 @@ LABEL_SPECIFICATION = {
     "RE_SALARY": re.compile(r"(salary|base|base pay)\s?[:-]-?\s?(?P<label>[\w\,\₹\$\.\/\-\(\)\`\\u20b9&#8377;\~ ]+)"),
     "RE_LOCATION": re.compile(r"location\s?[:-]-?\s?(?P<label>[\w\,\` ]+)"),
     "RE_SALARY_TOTAL": re.compile(
-        r"\ntot?al (1st year\s)?(comp[e|a]nsation|comp|ctc)(\sfor 1st year)?(\s?\(\s?(salary|base).+?\))?(?P<label>.+)"
+        r"\\ntot?al (1st year\s)?(comp[e|a]nsation|comp|ctc)(\sfor 1st year)?(\s?\(\s?(salary|base).+?\))?(?P<label>.+)"
     ),
     "RE_SALARY_CLEAN_LPA": re.compile(r"(\d{1,3}(\.\d{1,2})?)\s?(lpa|lakh|lac|l)"),
 }
@@ -63,16 +65,17 @@ def _find_matches(regex_pattern: Pattern[str], content: str) -> List[str]:
 
 
 def _get_info_as_flat_list(
-    companies: List[str], titles: List[str], yoes: List[str], salaries: List[str], info: Dict[str, Any]
+    companies: List[str], roles: List[str], yoes: List[str], pays: List[str], pays_t: List[str], info: Dict[str, Any]
 ) -> List[Dict[str, Any]]:
-    n_info = min([len(companies), len(titles), len(yoes), len(salaries)])
+    n_info = min([len(companies), len(roles), len(yoes), len(pays)])
     expanded_info = []
     for _ in range(n_info):
         _info = info.copy()
         _info["company"] = companies[0]
-        _info["role"] = titles[0]
+        _info["role"] = roles[0]
         _info["yoe"] = yoes[0]
-        _info["salary"] = salaries[0]
+        _info["salary"] = pays[0]
+        _info["salaryTotal"] = pays_t[0] if pays_t else ""
         expanded_info.append(_info)
     return expanded_info
 
@@ -133,6 +136,9 @@ def _report(raw_info: List[Dict[str, Any]]) -> None:
     logger.info(f"Posts with Location: {len([r for r in raw_info if 'country' in r])}")
     logger.info(f"Posts with YOE: {len([r for r in raw_info if r['cleanYoe'] >= 0])}")
     logger.info(f"Posts from India: {len([r for r in raw_info if 'country' in r and r['country'] == 'india'])}")
+    logger.info(
+        f"Posts with Total Comp: {len([r for r in raw_info if 'cleanSalaryTotal' in r and r['cleanSalaryTotal'] != -1.0])}"
+    )
 
 
 def _is_valid_yearly_base_pay_from_india(base_pay: float):
@@ -143,6 +149,10 @@ def _is_valid_monthly_internship_pay_from_india(base_pay: float):
     return base_pay >= INTERN_SALARY_RANGE_INDIA[0] and base_pay <= INTERN_SALARY_RANGE_INDIA[1]
 
 
+def _is_valid_monthly_total_pay_from_india(base_pay: float):
+    return base_pay >= TOTAL_SALARY_RANGE_INDIA[0] and base_pay <= TOTAL_SALARY_RANGE_INDIA[1]
+
+
 def _filter_invalid_salaries(raw_info: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     n_india = 0
     n_dropped = 0
@@ -150,6 +160,12 @@ def _filter_invalid_salaries(raw_info: List[Dict[str, Any]]) -> List[Dict[str, A
     for r in raw_info:
         if "country" in r and r["country"] == "india":
             n_india += 1
+            if "cleanSalaryTotal" in r and r["cleanSalaryTotal"] != -1:
+                if not _is_valid_monthly_total_pay_from_india(r["cleanSalaryTotal"]):
+                    r["cleanSalaryTotal"] = -1.0
+                elif r["cleanSalaryTotal"] / r["cleanSalary"] > TOTAL_TO_BASE_MAX_RATIO:
+                    r["cleanSalaryTotal"] = -1.0
+
             if r["yrOrPm"] == "yearly" and not _is_valid_yearly_base_pay_from_india(r["cleanSalary"]):
                 n_dropped += 1
                 continue
@@ -160,6 +176,28 @@ def _filter_invalid_salaries(raw_info: List[Dict[str, Any]]) -> List[Dict[str, A
                 filtered_info.append(r)
     logger.info(f"Dropped {n_dropped}/{n_india} records due to invalid pay")
     return filtered_info
+
+
+def _add_clean_yoe_and_salaries(expanded_info: List[Dict[str, Any]], info: Dict[str, Any], title: str) -> None:
+    for info in expanded_info:
+        info["cleanYoe"] = _get_clean_yoe(info["yoe"].lower(), _preprocess_text(title).lower(), info["role"].lower())
+        if "country" in info and info["country"] == "india":
+            if "\\n" in info["salary"].replace(",", "").lower():
+                info["cleanSalary"], info["yrOrPm"] = _get_clean_salary_for_india(
+                    info["salary"].replace(",", "").lower().split("\\n")[0]
+                )
+            else:
+                info["cleanSalary"], info["yrOrPm"] = _get_clean_salary_for_india(
+                    info["salary"].replace(",", "").lower()
+                )
+            if info["yrOrPm"] == "yearly":
+                total_salary, _ = _get_clean_salary_for_india(
+                    info["salaryTotal"].replace(",", "").lower().split("\\n")[0]
+                )
+                if info["cleanSalary"] != -1 and total_salary > info["cleanSalary"]:
+                    info["cleanSalaryTotal"] = total_salary
+                else:
+                    info["cleanSalaryTotal"] = -1
 
 
 def _get_clean_company_text(company: str) -> str:
@@ -177,6 +215,14 @@ def _add_clean_companies(raw_info: List[Dict[str, Any]]) -> None:
     for r in raw_info:
         clean_company = clean_company_map[_get_clean_company_text(r["company"])]
         r["cleanCompany"] = " ".join([txt.capitalize() for txt in clean_company.split(" ")])
+
+
+def _drop_info(raw_info: List[Dict[str, Any]]) -> None:
+    for r in raw_info:
+        try:
+            del r["title"], r["yoe"], r["salary"], r["salaryTotal"], r["city"], r["country"]
+        except KeyError:
+            continue
 
 
 def _save_raw_info(raw_info: List[Dict[str, Any]]) -> None:
@@ -197,6 +243,9 @@ def _save_meta_info(total_posts: int, raw_info: List[Dict[str, Any]]) -> Dict[st
     meta_info = {
         "totalPosts": total_posts,
         "totalPostsFromIndia": len([r for r in raw_info if "country" in r and r["country"] == "india"]),
+        "totalPostsWithTotalComp": len(
+            [r for r in raw_info if "cleanSalaryTotal" in r and r["cleanSalaryTotal"] != -1.0]
+        ),
         "lastUpdated": datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
         "top20Companies": top_20,
         "mostOffersInLastMonth": most_offers,
@@ -229,30 +278,18 @@ def parse_posts_and_save_tagged_info() -> None:
             roles = _find_matches(LABEL_SPECIFICATION["RE_ROLE"], clean_content)
             yoes = _find_matches(LABEL_SPECIFICATION["RE_YOE"], clean_content)
             salaries = _find_matches(LABEL_SPECIFICATION["RE_SALARY"], clean_content)
+            total_salaies = _find_matches(LABEL_SPECIFICATION["RE_SALARY_TOTAL"], clean_content)
             if companies and roles and yoes and salaries:
-                expanded_info = _get_info_as_flat_list(companies, roles, yoes, salaries, info)
+                expanded_info = _get_info_as_flat_list(companies, roles, yoes, salaries, total_salaies, info)
                 location = _get_clean_location(_preprocess_text(r.title), clean_content)
                 if location[1]:
                     for info in expanded_info:
                         info["city"] = location[0]; info["country"] = location[1]
-                for info in expanded_info:
-                    info["cleanYoe"] = _get_clean_yoe(
-                        info["yoe"].lower(), _preprocess_text(r.title).lower(), info["role"].lower()
-                    )
-                    if "country" in info and info["country"] == "india":
-                        if "\\n" in info["salary"].replace(",", "").lower():
-                            info["cleanSalary"], info["yrOrPm"] = _get_clean_salary_for_india(
-                                info["salary"].replace(",", "").lower().split("\\n")[0]
-                            )
-                        else:
-                            info["cleanSalary"], info["yrOrPm"] = _get_clean_salary_for_india(
-                                info["salary"].replace(",", "").lower()
-                            )
+                _add_clean_yoe_and_salaries(expanded_info, info, r.title)
                 raw_info += expanded_info
             else:
                 n_dropped += 1
     # fmt: on
-
     logger.info(f"Total posts: {total_posts}")
     logger.info(f"N posts dropped (missing data): {n_dropped}")
     _report(raw_info)
@@ -260,8 +297,9 @@ def parse_posts_and_save_tagged_info() -> None:
 
     _add_clean_companies(raw_info)
     raw_info = sorted(raw_info, key=lambda x: x["date"], reverse=True)
-    _save_raw_info(raw_info)
     meta_info = _save_meta_info(total_posts, raw_info)
+    _drop_info(raw_info)
+    _save_raw_info(raw_info)
     _update_data_in_js(raw_info, meta_info)
 
 
