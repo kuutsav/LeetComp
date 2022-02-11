@@ -155,7 +155,7 @@ function plotSalaryYoeBinsChart() {
         marker: { color: "green" }
     };
     var layout = {
-        title: { text: "# yoe bins #", font: { size: 12 } }, margin: { t: 20, l: 30 },
+        title: { text: "# yoe bins (base) #", font: { size: 12 } }, margin: { t: 20, l: 30 },
         xaxis: { tickfont: { size: 10 } },
         showlegend: false
     }
@@ -164,6 +164,73 @@ function plotSalaryYoeBinsChart() {
     Plotly.newPlot("salaryYoeBinsChart", traces, layout);
 }
 plotSalaryYoeBinsChart();
+
+function plotSalaryTotalYoeBinsChart() {
+    var yoeBin1 = []; var yoeBin2 = []; var yoeBin3 = []; var yoeBin4 = []; var yoeBin5 = [];
+    for (i = 0; i < data.length; i++) {
+        if (data[i][keyMap["cleanSalaryTotal"]] != -1) {
+            if (data[i][keyMap["cleanYoe"]] >= 0 && data[i][keyMap["cleanYoe"]] < 1) {
+                yoeBin1.push(data[i][keyMap["cleanSalaryTotal"]]);
+            }
+            else if (data[i][keyMap["cleanYoe"]] >= 1 && data[i][keyMap["cleanYoe"]] < 3) {
+                yoeBin2.push(data[i][keyMap["cleanSalaryTotal"]]);
+            }
+            else if (data[i][keyMap["cleanYoe"]] >= 3 && data[i][keyMap["cleanYoe"]] < 6) {
+                yoeBin3.push(data[i][keyMap["cleanSalaryTotal"]]);
+            }
+            else if (data[i][keyMap["cleanYoe"]] >= 6 && data[i][keyMap["cleanYoe"]] < 9) {
+                yoeBin4.push(data[i][keyMap["cleanSalaryTotal"]]);
+            }
+            else if (data[i][keyMap["cleanYoe"]] >= 9) {
+                yoeBin5.push(data[i][keyMap["cleanSalaryTotal"]]);
+            }
+        }
+    }
+    var trace1 = {
+        y: yoeBin1,
+        type: "box",
+        name: "0-1",
+        opacity: 0.5,
+        marker: { color: "red" }
+    };
+    var trace2 = {
+        y: yoeBin2,
+        type: "box",
+        name: "1-3",
+        opacity: 0.5,
+        marker: { color: "red" }
+    };
+    var trace3 = {
+        y: yoeBin3,
+        type: "box",
+        name: "3-6",
+        opacity: 0.5,
+        marker: { color: "red" }
+    };
+    var trace4 = {
+        y: yoeBin4,
+        type: "box",
+        name: "6-9",
+        opacity: 0.5,
+        marker: { color: "red" }
+    };
+    var trace5 = {
+        y: yoeBin5,
+        type: "box",
+        name: "9+",
+        opacity: 0.5,
+        marker: { color: "red" }
+    };
+    var layout = {
+        title: { text: "# yoe bins (total) #", font: { size: 12 } }, margin: { t: 20, l: 30 },
+        xaxis: { tickfont: { size: 10 } },
+        showlegend: false
+    }
+
+    var traces = [trace1, trace2, trace3, trace4, trace5];
+    Plotly.newPlot("salaryTotalYoeBinsChart", traces, layout);
+}
+plotSalaryTotalYoeBinsChart();
 
 function getFormattedYoe(yoe) {
     if (yoe == -1) {
@@ -244,6 +311,7 @@ updateNRows();
 function resetData() {
     plotSalaryBarChartData();
     plotSalaryYoeBinsChart();
+    plotSalaryTotalYoeBinsChart();
     updatePageCount();
     updatePostsTableContent(0, pageSize);
     resetNavPageNo();
@@ -315,6 +383,9 @@ function search(e) {
             return a - b;
         });;
         filterSearchIndexes(allIxs);
+        // Reset you range (WIP)
+        document.getElementById("minYoe").value = "";
+        document.getElementById("minYoe").value = "";
         resetData();
     }
 }
@@ -344,6 +415,8 @@ function _yoeFilter(e) {
             window.data.push(allData[i]);
         }
     }
+    // Reset search (WIP)
+    document.getElementById("search").value = "";
     resetData();
 }
 const yoeFilter = debounce((e) => _yoeFilter(e));

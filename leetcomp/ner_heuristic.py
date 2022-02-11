@@ -197,6 +197,8 @@ def _add_clean_yoe_and_salaries(expanded_info: List[Dict[str, Any]], info: Dict[
                     info["cleanSalaryTotal"] = total_salary
                 else:
                     info["cleanSalaryTotal"] = -1
+            else:
+                info["cleanSalaryTotal"] = -1
 
 
 def _get_clean_company_text(company: str) -> str:
@@ -263,9 +265,23 @@ def _update_data_in_js(raw_info: List[Dict[str, Any]], meta_info: Dict[str, Any]
         f.write(f"var allData = {json.dumps([list(r.values()) for r in raw_info])};")
 
 
+def _post_process_report_and_save_data(total_posts: int, n_dropped: int, raw_info: List[Dict[str, Any]]) -> None:
+    logger.info(f"Total posts: {total_posts}")
+    logger.info(f"N posts dropped (missing data): {n_dropped}")
+    _report(raw_info)
+    raw_info = _filter_invalid_salaries(raw_info)
+
+    _add_clean_companies(raw_info)
+    raw_info = sorted(raw_info, key=lambda x: x["date"], reverse=True)
+    meta_info = _save_meta_info(total_posts, raw_info)
+    _drop_info(raw_info)
+    _save_raw_info(raw_info)
+    _update_data_in_js(raw_info, meta_info)
+
+
 def parse_posts_and_save_tagged_info() -> None:
     # fmt: off
-    raw_info = []; n_dropped = 0; total_posts = 0; content = {}
+    raw_info = []; n_posts_dropped = 0; total_posts = 0; content = {}
     with session_scope() as session:
         for r in session.query(Posts).all():
             total_posts += 1
@@ -287,19 +303,9 @@ def parse_posts_and_save_tagged_info() -> None:
                 _add_clean_yoe_and_salaries(expanded_info, info, r.title)
                 raw_info += expanded_info
             else:
-                n_dropped += 1
+                n_posts_dropped += 1
     # fmt: on
-    logger.info(f"Total posts: {total_posts}")
-    logger.info(f"N posts dropped (missing data): {n_dropped}")
-    _report(raw_info)
-    raw_info = _filter_invalid_salaries(raw_info)
-
-    _add_clean_companies(raw_info)
-    raw_info = sorted(raw_info, key=lambda x: x["date"], reverse=True)
-    meta_info = _save_meta_info(total_posts, raw_info)
-    _drop_info(raw_info)
-    _save_raw_info(raw_info)
-    _update_data_in_js(raw_info, meta_info)
+    _post_process_report_and_save_data(total_posts, n_posts_dropped, raw_info)
 
 
 if __name__ == "__main__":
