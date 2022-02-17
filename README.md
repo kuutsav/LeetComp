@@ -78,10 +78,6 @@ $ poetry shell
 
 - Automate data refresh using aws lambda
 - Standardize `Company` and `Role`
-- Add `Total Comp`
 - Index `Company` and `Role` separately
-- Add more charts ??
-- Add data sorting capabilities
-- Trending companies
 - Improve page nav
 - Global data support
