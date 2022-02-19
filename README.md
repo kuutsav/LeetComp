@@ -24,7 +24,7 @@ $ poetry shell
 # Tested on python 3.9.7
 ```
 
-## Updating data (stores in `Posts.db` under the parent folder)
+## Updating data
 
 #### 1. Fetching metadata for compensation posts
 
@@ -34,6 +34,8 @@ $ poetry shell
 
 2022-02-08 | INFO | get_posts_meta_info:153 - Found 6628 posts(442 pages)
 2022-02-08 | INFO | get_posts_meta_info:162 - 32 posts synced, skipping the rest ...
+
+# stores in Posts.db under the parent folder
 ```
 
 #### 2. Updating Posts with the user content
@@ -48,6 +50,8 @@ $ poetry shell
 2022-02-09 | INFO | update_posts_content_info:189 - PostID 1755933;  20/32 posts done
 2022-02-09 | INFO | update_posts_content_info:189 - PostID 1754969;  30/32 posts done
 2022-02-09 | INFO | update_posts_content_info:190 - All post contents synced
+
+# updates Posts.db
 ```
 
 #### 3. Parsing results for the ui
@@ -63,6 +67,8 @@ $ poetry shell
 2022-02-09 | INFO | _report:127 - Posts with YOE: 5204
 2022-02-09 | INFO | _report:128 - Posts from India: 3764
 2022-02-09 | INFO | _filter_invalid_salaries:154 - Dropped 221/3764 records due to invalid pay
+
+# updates js/data.js
 ```
 
 #### 4. Updating the inverted index
@@ -72,11 +78,13 @@ $ poetry shell
 >>> build_inverted_index()
 
 2022-02-09 | INFO | __main__:build_inverted_index:58 - Keeping 1266/1266 tokens
+
+# updates js/data.js
 ```
 
 ## Roadmap
 
-- Automate data refresh using aws lambda
+- Automate data refresh using github actions
 - Standardize `Company` and `Role`
 - Index `Company` and `Role` separately
 - Improve page nav
