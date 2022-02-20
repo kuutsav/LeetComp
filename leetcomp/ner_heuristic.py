@@ -82,7 +82,6 @@ def _get_info_as_flat_list(
         info["salary"] = pays[0]
         info["salaryTotal"] = pays_total[0] if pays_total else ""
         expanded_info.append(info)
-
     return expanded_info
 
 
@@ -281,7 +280,6 @@ def _save_meta_info(total_posts: int, raw_info: List[Dict[str, Any]]) -> Dict[st
     }
     with open(os.path.join(DATA_DIR, "meta_info.json"), "w") as f:
         json.dump(meta_info, f)
-
     return meta_info
 
 

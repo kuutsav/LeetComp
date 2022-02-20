@@ -65,7 +65,6 @@ def _get_comp_posts(query: Dict[str, Any], posts_cache_path: str) -> Tuple[Dict[
             json.dump(response.json(), f)
         posts_data = response.json()
         cache_is_used = False
-
     return posts_data, cache_is_used
 
 
@@ -82,7 +81,6 @@ def _get_content_from_post_id(query: Dict[str, Any], content_cache_dir: str) -> 
             json.dump(response.json(), f)
         post_content = response.json()
         cache_is_used = False
-
     return post_content, cache_is_used
 
 
@@ -108,7 +106,6 @@ def _get_info_from_posts(skip: int = 0, first: int = 15) -> Tuple[List[Dict[str,
         }
         for d in data["edges"]
     ]
-
     return filtered_data, data["totalNum"], cache_is_used
 
 
@@ -121,7 +118,6 @@ def _get_content_from_post(post_id: str) -> Tuple[Dict[str, Any], bool]:
     if not data:
         logger.warning(f"Missing content for post_id {post_id}")
         return {}, False
-
     return data, cache_is_used
 
 
