@@ -79,6 +79,7 @@ fragment CoinReward on ScoreNode {
 }
 """
 
+
 COMP_POSTS_DATA_QUERY = {
     "operationName": "categoryTopicList",
     "query": COMP_POSTS_QUERY,
