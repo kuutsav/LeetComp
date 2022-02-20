@@ -112,7 +112,7 @@ def _get_standardized_location(title: str, content: str) -> Tuple[str, str]:
 
 
 def _get_standardized_yoe(yoe: str, clean_title: str, role: str) -> float:
-    if yoe in {"fresher", "new grad", "n/a", "none"}:
+    if yoe in {"fresher", "new grad", "n/a", "none", "nil"}:
         return 0.0
     if "grad" in yoe:
         return 0.0
