@@ -84,7 +84,3 @@ def build_inverted_index() -> None:
     inverted_index = _build_inverted_index(posts_data, tokens_to_keep)
     logger.info(f"Keeping {len(tokens_to_keep)}/{len(token_counter)} tokens")
     save_data(inverted_index)
-
-
-if __name__ == "__main__":
-    build_inverted_index()

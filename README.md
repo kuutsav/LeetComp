@@ -5,9 +5,13 @@
 
 Analysing compensations mentioned on the Leetcode forums (https://kuutsav.github.io/LeetComp).
 
-> Note: only supports posts from `India` at the moment
+> Note: Only supports posts from `India` at the moment.
+
+LeetComp works by regularly fetching new posts from the [leetcode compensations page](https://leetcode.com/discuss/compensation). The `leetcomp` directory contains python scripts to fetch and parse new posts. New posts are updated in `posts.db`, a SQLite database. The parsed posts are updated directly into `js/data.js` which helps power the content in `index.html`
 
 ---
+
+The app is hosted at https://kuutsav.github.io/LeetComp/ using github pages.
 
 ## Setup
 
@@ -26,66 +30,42 @@ $ poetry shell
 
 ## Updating data
 
-#### 1. Fetching metadata for compensation posts
-
 ```python
->>> from leetcomp.services import get_posts_meta_info
->>> get_posts_meta_info()
+$ poetry shell
+$ export PYTHONPATH=.
+$ python update.py
 
-2022-02-08 | INFO | get_posts_meta_info:153 - Found 6628 posts(442 pages)
-2022-02-08 | INFO | get_posts_meta_info:162 - 32 posts synced, skipping the rest ...
-
-# stores in Posts.db under the parent folder
-```
-
-#### 2. Updating Posts with the user content
-
-```python
->>> from leetcomp.services import update_posts_content_info
->>> update_posts_content_info()
-
-2022-02-09 | INFO | update_posts_content_info:177 - Found 32 post ids without content, syncing ...
-2022-02-09 | INFO | update_posts_content_info:189 - PostID 1757667;   0/32 posts done
-2022-02-09 | INFO | update_posts_content_info:189 - PostID 1757212;  10/32 posts done
-2022-02-09 | INFO | update_posts_content_info:189 - PostID 1755933;  20/32 posts done
-2022-02-09 | INFO | update_posts_content_info:189 - PostID 1754969;  30/32 posts done
-2022-02-09 | INFO | update_posts_content_info:190 - All post contents synced
-
-# updates Posts.db
-```
-
-#### 3. Parsing results for the ui
-
-```python
->>> from leetcomp.ner_heuristic import parse_posts_and_save_tagged_info
->>> parse_posts_and_save_tagged_info()
-
-2022-02-09 | INFO | parse_posts_and_save_tagged_info:191 - Total posts: 6663
-2022-02-09 | INFO | parse_posts_and_save_tagged_info:192 - N posts dropped (missing data): 1380
-2022-02-09 | INFO | _report:125 - Posts with all the info: 5294
-2022-02-09 | INFO | _report:126 - Posts with Location: 4981
-2022-02-09 | INFO | _report:127 - Posts with YOE: 5204
-2022-02-09 | INFO | _report:128 - Posts from India: 3764
-2022-02-09 | INFO | _filter_invalid_salaries:154 - Dropped 221/3764 records due to invalid pay
-
-# updates js/data.js
-```
-
-#### 4. Updating the inverted index
-
-```python
->>> from leetcomp.inverted_index import build_inverted_index
->>> build_inverted_index()
-
-2022-02-09 | INFO | __main__:build_inverted_index:58 - Keeping 1266/1266 tokens
-
-# updates js/data.js
+----------------------------Fetching posts meta info----------------------------
+Found 6835 posts(456 pages)
+73 posts synced, skipping the rest ...
+--------------------------Updating posts with content---------------------------
+Found 73 post ids without content, syncing ...
+PostID 1786560;   0/73 posts done
+PostID 1783572;  10/73 posts done
+PostID 1781876;  20/73 posts done
+PostID 1780132;  30/73 posts done
+PostID 1779056;  40/73 posts done
+PostID 1777850;  50/73 posts done
+PostID 1776532;  60/73 posts done
+PostID 1775146;  70/73 posts done
+All posts synced
+---------------------------------Parsing posts----------------------------------
+Total posts: 6905
+N posts dropped (missing data): 1448
+Posts with all the info: 5468
+Posts with Location: 5150
+Posts with YOE: 5385
+Posts from India: 3923
+Posts with Total Comp: 2257
+Dropped 181/3923 records due to invalid pay
+----------------------------Building inverted index-----------------------------
+Keeping 1303/1303 tokens
 ```
 
 ## Roadmap
 
 - Automate data refresh using github actions
-- Standardize `Company` and `Role`
-- Index `Company` and `Role` separately
-- Improve page nav
-- Global data support
+- Standardize `Company` and `Role` (for example "Amazon aws" -> "Amazon")
+- Index `Company` and `Role` separately (to enable searching for company and roles separately)
+- Improve page nav (links to more pages, last page, etc.)
+- Global data support (Depends on the traction this project gets from other countries)
