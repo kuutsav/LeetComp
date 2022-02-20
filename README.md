@@ -5,7 +5,7 @@
 
 Analysing compensations mentioned on the Leetcode forums.
 
-> Note: Only supports posts from `India` at the moment
+> Note: Only supports posts from `India` at the moment.
 
 LeetComp works by regularly fetching new posts from the [leetcode compensations page](https://leetcode.com/discuss/compensation). The `leetcomp` directory contains python scripts to fetch and parse new posts. New posts are updated in `posts.db`, a SQLite database. The parsed posts are updated directly into `js/data.js` which helps power the content in `index.html`
 
