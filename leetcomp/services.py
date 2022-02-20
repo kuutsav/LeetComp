@@ -29,7 +29,7 @@ else:
             os.remove(f"{CACHE_DIR}/{f}")
 
 
-def _get_post_ids_in_db() -> Set[str]:
+def get_post_ids_in_db() -> Set[str]:
     with session_scope() as session:
         return set([r.id for r in session.query(Posts.id).all()])
 
@@ -52,7 +52,7 @@ def _validate_post_content_response(response: requests.Response) -> None:
     ), f"`post` not in {response_json['data']['topic']['post']}"
 
 
-def _get_all_comp_posts(query: Dict[str, Any], posts_cache_path: str) -> Tuple[Dict[str, Any], bool]:
+def _get_comp_posts(query: Dict[str, Any], posts_cache_path: str) -> Tuple[Dict[str, Any], bool]:
     if os.path.exists(posts_cache_path):
         with open(posts_cache_path, "r") as f:
             posts_data = json.load(f)
@@ -60,6 +60,7 @@ def _get_all_comp_posts(query: Dict[str, Any], posts_cache_path: str) -> Tuple[D
     else:
         response = requests.post(LEETCODE_GRAPHQL_URL, json=query)
         _validate_comp_posts_response(response)
+        # cache data
         with open(posts_cache_path, "w") as f:
             json.dump(response.json(), f)
         posts_data = response.json()
@@ -68,15 +69,16 @@ def _get_all_comp_posts(query: Dict[str, Any], posts_cache_path: str) -> Tuple[D
     return posts_data, cache_is_used
 
 
-def _get_content_from_post_id(query: Dict[str, Any], post_content_cache_path: str) -> Tuple[dict, bool]:
-    if os.path.exists(post_content_cache_path):
-        with open(post_content_cache_path, "r") as f:
+def _get_content_from_post_id(query: Dict[str, Any], content_cache_dir: str) -> Tuple[dict, bool]:
+    if os.path.exists(content_cache_dir):
+        with open(content_cache_dir, "r") as f:
             post_content = json.load(f)
         cache_is_used = True
     else:
         response = requests.post(LEETCODE_GRAPHQL_URL, json=query)
         _validate_post_content_response(response)
-        with open(post_content_cache_path, "w") as f:
+        # cache data
+        with open(content_cache_dir, "w") as f:
             json.dump(response.json(), f)
         post_content = response.json()
         cache_is_used = False
@@ -89,7 +91,7 @@ def _get_info_from_posts(skip: int = 0, first: int = 15) -> Tuple[List[Dict[str,
     COMP_POSTS_DATA_QUERY["variables"]["first"] = first  # type: ignore
     posts_cache_path = f"{CACHE_DIR}/{get_today()}_posts_data_{skip}_{first}.json"
 
-    data, cache_is_used = _get_all_comp_posts(COMP_POSTS_DATA_QUERY, posts_cache_path)
+    data, cache_is_used = _get_comp_posts(COMP_POSTS_DATA_QUERY, posts_cache_path)
     data = data["data"]["categoryTopicList"]
     if not data or "edges" not in data:
         logger.warning(f"Missing data for skip {skip}, first {first}")
@@ -137,63 +139,53 @@ def _get_post_ids_without_content() -> List[str]:
         return [r.id for r in session.query(Posts.id).filter(Posts.content == "").all()]
 
 
-def get_posts_meta_info() -> None:
-    n_posts_per_req = 15
-    start = 0
-    old_post_ids = _get_post_ids_in_db()
-    n_new_posts = 0
-    try:
-        # fetching the first page separately to get totalNum pages
-        data, n_posts, cache_is_used = _get_info_from_posts(start, n_posts_per_req)
+def _update_post_ids_and_new_post_counts(n_new_posts: int, old_post_ids: Set[str], new_data: List[Dict[str, str]]):
+    with session_scope() as session:
+        session.add_all([Posts(**d) for d in new_data])
+        _update_old_post_ids(old_post_ids, new_data)
+        n_new_posts += len(new_data)
+    return n_new_posts
+
+
+def get_posts_meta_info() -> List[str]:
+    # fmt: off
+    n_posts_per_req = 15; start = 0; n_new_posts = 0
+    # fmt: on
+    old_post_ids = get_post_ids_in_db()
+    # fetching the first page separately to get totalNum pages
+    data, n_posts, cache_is_used = _get_info_from_posts(start, n_posts_per_req)
+    new_data = _get_new_posts(data, old_post_ids)
+    n_new_posts = _update_post_ids_and_new_post_counts(n_new_posts, old_post_ids, new_data)
+    n_pages = math.ceil(n_posts / n_posts_per_req)
+    logger.info(f"Found {n_posts} posts({n_pages} pages)")
+    # fetching the rest of the pages
+    for page_no in range(1, n_pages + 1):
+        sleep_for = 0 if cache_is_used else random.random() + SLEEP_FOR_ATLEAST
+        time.sleep(sleep_for)
+        start += n_posts_per_req
+        data, _, cache_is_used = _get_info_from_posts(start, n_posts_per_req)
         new_data = _get_new_posts(data, old_post_ids)
-        with session_scope() as session:
-            session.add_all([Posts(**d) for d in new_data])
-            _update_old_post_ids(old_post_ids, new_data)
-            n_new_posts += len(new_data)
-        n_pages = math.ceil(n_posts / n_posts_per_req)
-        logger.info(f"Found {n_posts} posts({n_pages} pages)")
-        # fetching the rest of the pages
-        for page_no in range(1, n_pages + 1):
-            sleep_for = 0 if cache_is_used else random.random() + SLEEP_FOR_ATLEAST
-            time.sleep(sleep_for)
-            start += n_posts_per_req
-            data, _, cache_is_used = _get_info_from_posts(start, n_posts_per_req)
-            new_data = _get_new_posts(data, old_post_ids)
-            if not new_data:
-                logger.info(f"{n_new_posts} posts synced, skipping the rest ...")
-                break
-            with session_scope() as session:
-                session.add_all([Posts(**d) for d in new_data])
-                _update_old_post_ids(old_post_ids, new_data)
-                n_new_posts += len(new_data)
-            if page_no % 10 == 0:
-                logger.info(f"{page_no:>3}/{n_pages+1} pages done; {page_no*100/n_pages:.2f}%; slept_for={sleep_for}")
-    except KeyboardInterrupt:
-        session.commit()
-        session.close()
+        if not new_data:
+            logger.info(f"{n_new_posts} posts synced, skipping the rest ...")
+            break
+        n_new_posts = _update_post_ids_and_new_post_counts(n_new_posts, old_post_ids, new_data)
+        if page_no % 10 == 0:
+            logger.info(f"{page_no:>3}/{n_pages+1} pages done; {page_no*100/n_pages:.2f}%; slept_for={sleep_for}")
+    return [d["id"] for d in new_data]
 
 
 def update_posts_content_info() -> None:
     post_ids_without_content = _get_post_ids_without_content()
     logger.info(f"Found {len(post_ids_without_content)} post ids without content, syncing ...")
-    try:
-        cache_is_used = False
-        for ix in range(len(post_ids_without_content)):
-            post_id = post_ids_without_content[ix]
-            sleep_for = 0 if cache_is_used else random.random() + SLEEP_FOR_ATLEAST
-            time.sleep(sleep_for)
-            post_content, cache_is_used = _get_content_from_post(post_id)
-            with session_scope() as session:
-                post = session.query(Posts).filter(Posts.id == post_id).first()
-                post.content = post_content
-            if ix % 10 == 0:
-                logger.info(f"PostID {post_id}; {ix:>3}/{len(post_ids_without_content)} posts done")
-        logger.info("All posts synced")
-    except KeyboardInterrupt:
-        session.commit()
-        session.close()
-
-
-if __name__ == "__main__":
-    get_posts_meta_info()
-    update_posts_content_info()
+    cache_is_used = False
+    for ix in range(len(post_ids_without_content)):
+        post_id = post_ids_without_content[ix]
+        sleep_for = 0 if cache_is_used else random.random() + SLEEP_FOR_ATLEAST
+        time.sleep(sleep_for)
+        post_content, cache_is_used = _get_content_from_post(post_id)
+        with session_scope() as session:
+            post = session.query(Posts).filter(Posts.id == post_id).first()
+            post.content = post_content
+        if ix % 10 == 0:
+            logger.info(f"PostID {post_id}; {ix:>3}/{len(post_ids_without_content)} posts done")
+    logger.info("All posts synced")
