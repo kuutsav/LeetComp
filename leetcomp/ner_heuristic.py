@@ -1,6 +1,7 @@
 from collections import Counter
 from datetime import datetime, timedelta
 import json
+import os
 import re
 from typing import Any, Dict, List, Pattern, Tuple, Union
 
@@ -10,6 +11,8 @@ from leetcomp.models import Posts
 from leetcomp.utils import session_scope
 
 
+DATA_DIR = "data"
+JS_DIR = "js"
 BASE_SALARY_RANGE_INDIA = (2_00_000, 100_00_000)
 TOTAL_SALARY_RANGE_INDIA = (2_00_000, 200_00_000)
 TOTAL_TO_BASE_MAX_RATIO = 2.5
@@ -32,7 +35,7 @@ LABEL_SPECIFICATION = {
 LOCATION_SPECIFICATION = {}
 
 # update the location specification
-with open("data/locations.json", "r") as f:
+with open(os.path.join(DATA_DIR, "locations.json"), "r") as f:
     location_data = json.load(f)
 
 for country, cities in location_data.items():
@@ -238,13 +241,21 @@ def _add_clean_companies(raw_info: List[Dict[str, Any]]) -> None:
 def _drop_info(raw_info: List[Dict[str, Any]]) -> None:
     for r in raw_info:
         try:
-            del r["title"], r["yoe"], r["salary"], r["salaryTotal"], r["city"], r["country"]
+            del (
+                r["title"],
+                r["yoe"],
+                r["salary"],
+                r["salaryTotal"],
+                r["city"],
+                r["country"],
+                r["content"],
+            )
         except KeyError:
             continue
 
 
 def _save_raw_info(raw_info: List[Dict[str, Any]]) -> None:
-    with open("data/posts_info.json", "w") as f:
+    with open(os.path.join(DATA_DIR, "posts_info.json"), "w") as f:
         json.dump(raw_info, f)
 
 
@@ -268,14 +279,14 @@ def _save_meta_info(total_posts: int, raw_info: List[Dict[str, Any]]) -> Dict[st
         "top20Companies": top_20,
         "mostOffersInLastMonth": most_offers,
     }
-    with open("data/meta_info.json", "w") as f:
+    with open(os.path.join(DATA_DIR, "meta_info.json"), "w") as f:
         json.dump(meta_info, f)
 
     return meta_info
 
 
 def _update_data_in_js(raw_info: List[Dict[str, Any]], meta_info: Dict[str, Any]) -> None:
-    with open("js/data.js", "w") as f:
+    with open(os.path.join(JS_DIR, "data.js"), "w") as f:
         f.write(f"var metaInfo = {json.dumps(meta_info)};\n\n")
         # we are only saving the values here to reduce data size and save network cost
         # when client loads the static content
@@ -295,9 +306,9 @@ def _find_companies_roles_yoes_salaries(
 
 def _log_new_data(new_post_ids: List[str], raw_info: List[Dict[str, Any]]):
     new_post_ids = set(new_post_ids)  # type: ignore
-    for info in raw_info:
-        if info["id"] in new_post_ids:
-            logger.info(info)
+    new_info = [info for info in raw_info if info["id"] in new_post_ids]
+    with open(os.path.join(DATA_DIR, "new_data.json"), "w") as f:
+        json.dump(new_info, f)
 
 
 def _post_process_report_and_save_data(
@@ -324,7 +335,7 @@ def parse_posts_and_save_tagged_info(new_post_ids: List[str]) -> None:
         for r in session.query(Posts).all():
             total_posts += 1
             info = {"id": r.id, "title": r.title, "voteCount": r.voteCount, "viewCount": r.viewCount,
-                    "date": datetime.fromtimestamp(int(r.creationDate)).strftime("%Y-%m-%d")}
+                    "date": datetime.fromtimestamp(int(r.creationDate)).strftime("%Y-%m-%d"), "content": r.content}
             clean_content = _preprocess_text(r.content)
             content[r.id] = clean_content
             companies, roles, yoes, salaries, total_salaries = _find_companies_roles_yoes_salaries(clean_content)
