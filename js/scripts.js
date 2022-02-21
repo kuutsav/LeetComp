@@ -346,12 +346,12 @@ function makeFullTimeButton() {
 // Search
 function filterSearchIndexes(ixs) {
     window.data = [];
-    companyData=[]
+    window.companyData = [];
     if (document.getElementById("fullTimeButton").classList.contains("active")) {
         for (i = 0; i < ixs.length; i++) {
             if (allData[ixs[i]][keyMap["yrOrPm"]] == "yearly") {
                 window.data.push(allData[ixs[i]]);
-                companyData.push(allData[ixs[i]]);
+                window.companyData.push(allData[ixs[i]]);
 
             }
         }
@@ -360,7 +360,7 @@ function filterSearchIndexes(ixs) {
         for (i = 0; i < ixs.length; i++) {
             if (allData[ixs[i]][keyMap["yrOrPm"]] == "monthly") {
                 window.data.push(allData[ixs[i]]);
-                companyData.push(allData[ixs[i]]);
+                window.companyData.push(allData[ixs[i]]);
             }
         }
     }
@@ -417,7 +417,7 @@ function _yoeFilter(e) {
     }
 
 
-    dataToFilter=[]
+    dataToFilter = [];
     if(companyData.length == 0) {
         dataToFilter = allData;
     }
