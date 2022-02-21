@@ -1,5 +1,6 @@
 // Data
 var data = [];
+var companyData = [];
 
 // Data ix and key (we dropped the keys to reduce data size and save network cost)
 keyMap = {
@@ -345,10 +346,13 @@ function makeFullTimeButton() {
 // Search
 function filterSearchIndexes(ixs) {
     window.data = [];
+    window.companyData = [];
     if (document.getElementById("fullTimeButton").classList.contains("active")) {
         for (i = 0; i < ixs.length; i++) {
             if (allData[ixs[i]][keyMap["yrOrPm"]] == "yearly") {
                 window.data.push(allData[ixs[i]]);
+                window.companyData.push(allData[ixs[i]]);
+
             }
         }
     }
@@ -356,6 +360,7 @@ function filterSearchIndexes(ixs) {
         for (i = 0; i < ixs.length; i++) {
             if (allData[ixs[i]][keyMap["yrOrPm"]] == "monthly") {
                 window.data.push(allData[ixs[i]]);
+                window.companyData.push(allData[ixs[i]]);
             }
         }
     }
@@ -387,7 +392,7 @@ function search(e) {
         filterSearchIndexes(allIxs);
         // Reset you range (WIP)
         document.getElementById("minYoe").value = "";
-        document.getElementById("minYoe").value = "";
+        document.getElementById("maxYoe").value = "";
         resetData();
     }
 }
@@ -410,15 +415,25 @@ function _yoeFilter(e) {
     else {
         maxYoe = parseFloat(maxYoe)
     }
+
+
+    dataToFilter = [];
+    if(companyData.length == 0) {
+        dataToFilter = allData;
+    }
+    else{
+        dataToFilter = companyData;
+    }
+    
     window.data = [];
-    for (i = 0; i < allData.length; i++) {
-        yoe = parseFloat(allData[i][keyMap["cleanYoe"]]);
+    for (i = 0; i < dataToFilter.length; i++) {
+        yoe = parseFloat(dataToFilter[i][keyMap["cleanYoe"]]);
         if (yoe >= minYoe && yoe <= maxYoe) {
-            window.data.push(allData[i]);
+            window.data.push(dataToFilter[i]);
         }
     }
     // Reset search (WIP)
-    document.getElementById("search").value = "";
+    //document.getElementById("search").value = "";
     resetData();
 }
 const yoeFilter = debounce((e) => _yoeFilter(e));
