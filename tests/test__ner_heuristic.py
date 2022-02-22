@@ -11,7 +11,7 @@ def test_parse_posts_and_save_tagged_info(
     parse_posts_and_save_tagged_info(new_post_ids)
 
     # validate metadata
-    with open("tests/tmp/meta_info.json", "r") as f:
+    with open("tests/meta_info.json", "r") as f:
         metadata = json.load(f)
         assert metadata["totalPosts"] == 20
         assert metadata["totalPostsFromIndia"] == 20
@@ -20,6 +20,6 @@ def test_parse_posts_and_save_tagged_info(
         assert metadata["mostOffersInLastMonth"] == [["Swiggy Title", 20]]
 
     # validate posts info
-    with open("tests/tmp/posts_info.json", "r") as f:
+    with open("tests/posts_info.json", "r") as f:
         posts_info = json.load(f)
         assert len(posts_info) == 20

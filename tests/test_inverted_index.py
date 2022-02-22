@@ -7,7 +7,7 @@ def test_build_inverted_index(mock_inverted_index_dirs):
     build_inverted_index()
 
     # validate inverted index
-    with open("tests/tmp/inverted_index.json", "r") as f:
+    with open("tests/inverted_index.json", "r") as f:
         inverted_index = json.load(f)
         assert inverted_index == {
             "swi": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],

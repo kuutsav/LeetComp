@@ -150,4 +150,3 @@ posts_info.json
 inverted_index.json
 .DS_Store
 .vscode
-tests/tmp

@@ -12,7 +12,7 @@ from leetcomp.models import Base
 def mock_session_scope(monkeypatch):
     def mock_session():
         # sqlite engine
-        engine = create_engine("sqlite:///tests/tmp/test_posts.db")
+        engine = create_engine("sqlite:///tests/test_posts.db")
         Session = sessionmaker()
         Session.configure(bind=engine)
         Base.metadata.create_all(engine)
@@ -65,11 +65,11 @@ def mock_get_post_ids_in_db(monkeypatch):
 
 @pytest.fixture
 def mock_ner_heuristic_dirs(monkeypatch):
-    monkeypatch.setattr("leetcomp.ner_heuristic.DATA_DIR", "tests/tmp")
-    monkeypatch.setattr("leetcomp.ner_heuristic.JS_DIR", "tests/tmp")
+    monkeypatch.setattr("leetcomp.ner_heuristic.DATA_DIR", "tests")
+    monkeypatch.setattr("leetcomp.ner_heuristic.JS_DIR", "tests")
 
 
 @pytest.fixture
 def mock_inverted_index_dirs(monkeypatch):
-    monkeypatch.setattr("leetcomp.inverted_index.DATA_DIR", "tests/tmp")
-    monkeypatch.setattr("leetcomp.inverted_index.JS_DIR", "tests/tmp")
+    monkeypatch.setattr("leetcomp.inverted_index.DATA_DIR", "tests")
+    monkeypatch.setattr("leetcomp.inverted_index.JS_DIR", "tests")
