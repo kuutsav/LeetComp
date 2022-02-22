@@ -32,7 +32,7 @@ $ poetry shell
 
 ## Updating data
 
-```python
+```bash
 $ poetry shell
 $ export PYTHONPATH=.
 $ python update.py
