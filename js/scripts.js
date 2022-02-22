@@ -4,8 +4,17 @@ var companyData = [];
 
 // Data ix and key (we dropped the keys to reduce data size and save network cost)
 keyMap = {
-    "id": 0, "voteCount": 1, "viewCount": 2, "date": 3, "company": 4, "role": 5,
-    "cleanYoe": 6, "cleanSalary": 7, "yrOrPm": 8, "cleanSalaryTotal": 9, "cleanCompany": 10
+    "id": 0,
+    "voteCount": 1,
+    "viewCount": 2,
+    "date": 3,
+    "company": 4,
+    "role": 5,
+    "cleanYoe": 6,
+    "cleanSalary": 7,
+    "yrOrPm": 8,
+    "cleanSalaryTotal": 9,
+    "cleanCompany": 10
 }
 
 // Constants
@@ -26,7 +35,6 @@ function updatePageCount() {
     window.nPages = Math.ceil(data.length / pageSize);
 }
 
-// Reference to the table with posts info
 var tableTbodyRef = document.getElementById("postInfo").getElementsByTagName("tbody")[0];
 
 function getAllBaseSalaries() {
@@ -55,21 +63,39 @@ function plotSalaryBarChartData() {
         name: "base",
         type: "histogram",
         opacity: 0.5,
-        marker: { color: "green" }
+        marker: {
+            color: "green"
+        }
     };
     var trace2 = {
         x: totalSalaries,
         name: "total",
         type: "histogram",
         opacity: 0.5,
-        marker: { color: "red" }
+        marker: {
+            color: "red"
+        }
     };
     var layout = {
-        title: { text: "# salaries #", font: { size: 12 } },
+        title: {
+            text: "# salaries #",
+            font: {
+                size: 12
+            }
+        },
         height: 400,
-        margin: { t: 20, l: 0, r: 0 },
-        yaxis: { automargin: true },
-        xaxis: { tickprefix: "₹ ", ticksuffix: " lpa" }
+        margin: {
+            t: 20,
+            l: 0,
+            r: 0
+        },
+        yaxis: {
+            automargin: true
+        },
+        xaxis: {
+            tickprefix: "₹ ",
+            ticksuffix: " lpa"
+        }
     };
     var salaryBarChart = [trace1, trace2];
     Plotly.newPlot("salaryBarChart", salaryBarChart, layout);
@@ -89,12 +115,26 @@ function plotTopCompaniesChartData() {
         y: counts,
         orientation: "v",
         opacity: 0.5,
-        marker: { color: "green" }
+        marker: {
+            color: "green"
+        }
     }];
     var layout = {
-        title: { text: "# top companies (static) #", font: { size: 12 } },
-        margin: { t: 20, l: 25 },
-        xaxis: { tickfont: { size: 10 } },
+        title: {
+            text: "# top companies (static) #",
+            font: {
+                size: 12
+            }
+        },
+        margin: {
+            t: 20,
+            l: 25
+        },
+        xaxis: {
+            tickfont: {
+                size: 10
+            }
+        },
         showlegend: false
     }
     Plotly.newPlot("topCompaniesBarChart", data, layout);
@@ -102,21 +142,21 @@ function plotTopCompaniesChartData() {
 plotTopCompaniesChartData();
 
 function plotSalaryYoeBinsChart() {
-    var yoeBin1 = []; var yoeBin2 = []; var yoeBin3 = []; var yoeBin4 = []; var yoeBin5 = [];
+    var yoeBin1 = [];
+    var yoeBin2 = [];
+    var yoeBin3 = [];
+    var yoeBin4 = [];
+    var yoeBin5 = [];
     for (i = 0; i < data.length; i++) {
         if (data[i][keyMap["cleanYoe"]] >= 0 && data[i][keyMap["cleanYoe"]] < 1) {
             yoeBin1.push(data[i][keyMap["cleanSalary"]]);
-        }
-        else if (data[i][keyMap["cleanYoe"]] >= 1 && data[i][keyMap["cleanYoe"]] < 3) {
+        } else if (data[i][keyMap["cleanYoe"]] >= 1 && data[i][keyMap["cleanYoe"]] < 3) {
             yoeBin2.push(data[i][keyMap["cleanSalary"]]);
-        }
-        else if (data[i][keyMap["cleanYoe"]] >= 3 && data[i][keyMap["cleanYoe"]] < 6) {
+        } else if (data[i][keyMap["cleanYoe"]] >= 3 && data[i][keyMap["cleanYoe"]] < 6) {
             yoeBin3.push(data[i][keyMap["cleanSalary"]]);
-        }
-        else if (data[i][keyMap["cleanYoe"]] >= 6 && data[i][keyMap["cleanYoe"]] < 9) {
+        } else if (data[i][keyMap["cleanYoe"]] >= 6 && data[i][keyMap["cleanYoe"]] < 9) {
             yoeBin4.push(data[i][keyMap["cleanSalary"]]);
-        }
-        else if (data[i][keyMap["cleanYoe"]] >= 9) {
+        } else if (data[i][keyMap["cleanYoe"]] >= 9) {
             yoeBin5.push(data[i][keyMap["cleanSalary"]]);
         }
     }
@@ -125,39 +165,62 @@ function plotSalaryYoeBinsChart() {
         type: "box",
         name: "0-1",
         opacity: 0.5,
-        marker: { color: "green" }
+        marker: {
+            color: "green"
+        }
     };
     var trace2 = {
         y: yoeBin2,
         type: "box",
         name: "1-3",
         opacity: 0.5,
-        marker: { color: "green" }
+        marker: {
+            color: "green"
+        }
     };
     var trace3 = {
         y: yoeBin3,
         type: "box",
         name: "3-6",
         opacity: 0.5,
-        marker: { color: "green" }
+        marker: {
+            color: "green"
+        }
     };
     var trace4 = {
         y: yoeBin4,
         type: "box",
         name: "6-9",
         opacity: 0.5,
-        marker: { color: "green" }
+        marker: {
+            color: "green"
+        }
     };
     var trace5 = {
         y: yoeBin5,
         type: "box",
         name: "9+",
         opacity: 0.5,
-        marker: { color: "green" }
+        marker: {
+            color: "green"
+        }
     };
     var layout = {
-        title: { text: "# yoe bins (base) #", font: { size: 12 } }, margin: { t: 20, l: 30 },
-        xaxis: { tickfont: { size: 10 } },
+        title: {
+            text: "# yoe bins (base) #",
+            font: {
+                size: 12
+            }
+        },
+        margin: {
+            t: 20,
+            l: 30
+        },
+        xaxis: {
+            tickfont: {
+                size: 10
+            }
+        },
         showlegend: false
     }
 
@@ -167,22 +230,22 @@ function plotSalaryYoeBinsChart() {
 plotSalaryYoeBinsChart();
 
 function plotSalaryTotalYoeBinsChart() {
-    var yoeBin1 = []; var yoeBin2 = []; var yoeBin3 = []; var yoeBin4 = []; var yoeBin5 = [];
+    var yoeBin1 = [];
+    var yoeBin2 = [];
+    var yoeBin3 = [];
+    var yoeBin4 = [];
+    var yoeBin5 = [];
     for (i = 0; i < data.length; i++) {
         if (data[i][keyMap["cleanSalaryTotal"]] != -1) {
             if (data[i][keyMap["cleanYoe"]] >= 0 && data[i][keyMap["cleanYoe"]] < 1) {
                 yoeBin1.push(data[i][keyMap["cleanSalaryTotal"]]);
-            }
-            else if (data[i][keyMap["cleanYoe"]] >= 1 && data[i][keyMap["cleanYoe"]] < 3) {
+            } else if (data[i][keyMap["cleanYoe"]] >= 1 && data[i][keyMap["cleanYoe"]] < 3) {
                 yoeBin2.push(data[i][keyMap["cleanSalaryTotal"]]);
-            }
-            else if (data[i][keyMap["cleanYoe"]] >= 3 && data[i][keyMap["cleanYoe"]] < 6) {
+            } else if (data[i][keyMap["cleanYoe"]] >= 3 && data[i][keyMap["cleanYoe"]] < 6) {
                 yoeBin3.push(data[i][keyMap["cleanSalaryTotal"]]);
-            }
-            else if (data[i][keyMap["cleanYoe"]] >= 6 && data[i][keyMap["cleanYoe"]] < 9) {
+            } else if (data[i][keyMap["cleanYoe"]] >= 6 && data[i][keyMap["cleanYoe"]] < 9) {
                 yoeBin4.push(data[i][keyMap["cleanSalaryTotal"]]);
-            }
-            else if (data[i][keyMap["cleanYoe"]] >= 9) {
+            } else if (data[i][keyMap["cleanYoe"]] >= 9) {
                 yoeBin5.push(data[i][keyMap["cleanSalaryTotal"]]);
             }
         }
@@ -192,39 +255,62 @@ function plotSalaryTotalYoeBinsChart() {
         type: "box",
         name: "0-1",
         opacity: 0.5,
-        marker: { color: "red" }
+        marker: {
+            color: "red"
+        }
     };
     var trace2 = {
         y: yoeBin2,
         type: "box",
         name: "1-3",
         opacity: 0.5,
-        marker: { color: "red" }
+        marker: {
+            color: "red"
+        }
     };
     var trace3 = {
         y: yoeBin3,
         type: "box",
         name: "3-6",
         opacity: 0.5,
-        marker: { color: "red" }
+        marker: {
+            color: "red"
+        }
     };
     var trace4 = {
         y: yoeBin4,
         type: "box",
         name: "6-9",
         opacity: 0.5,
-        marker: { color: "red" }
+        marker: {
+            color: "red"
+        }
     };
     var trace5 = {
         y: yoeBin5,
         type: "box",
         name: "9+",
         opacity: 0.5,
-        marker: { color: "red" }
+        marker: {
+            color: "red"
+        }
     };
     var layout = {
-        title: { text: "# yoe bins (total) #", font: { size: 12 } }, margin: { t: 20, l: 30 },
-        xaxis: { tickfont: { size: 10 } },
+        title: {
+            text: "# yoe bins (total) #",
+            font: {
+                size: 12
+            }
+        },
+        margin: {
+            t: 20,
+            l: 30
+        },
+        xaxis: {
+            tickfont: {
+                size: 10
+            }
+        },
         showlegend: false
     }
 
@@ -236,8 +322,7 @@ plotSalaryTotalYoeBinsChart();
 function getFormattedYoe(yoe) {
     if (yoe == -1) {
         return "<button class='btn-danger'>n/a</button>";
-    }
-    else {
+    } else {
         return yoe;
     }
 }
@@ -245,8 +330,7 @@ function getFormattedYoe(yoe) {
 function getFormattedTotalSalary(totalSalary) {
     if (totalSalary == -1) {
         return "<button class='btn-danger'>n/a</button>";
-    }
-    else {
+    } else {
         return "₹ " + totalSalary.toLocaleString("en-IN");
     }
 }
@@ -264,9 +348,9 @@ function updatePostsTableContent(startIndex, endIndex) {
         myHtmlContent += "<td>" + data[i][keyMap["date"]] + "</td>";
         myHtmlContent += "<td>" + data[i][keyMap["viewCount"]] + "</td>";
         myHtmlContent += "<td>" + data[i][keyMap["voteCount"]] + "</td>";
-        myHtmlContent += "<td><a href=https://leetcode.com/discuss/compensation/"+ data[i][keyMap["id"]] + ">"
-                            + data[i][keyMap["id"]] + 
-                        "</a></td></tr>";
+        myHtmlContent += "<td><a href=https://leetcode.com/discuss/compensation/" + data[i][keyMap["id"]] + ">" +
+            data[i][keyMap["id"]] +
+            "</a></td></tr>";
     }
     tableTbodyRef.innerHTML = myHtmlContent;
 };
@@ -329,6 +413,7 @@ function makeInternButton() {
     eInternship.classList.add("active");
 
     setFullTimeOrInternship("monthly");
+    _SearchYoeFilter();
     resetData();
 }
 
@@ -340,117 +425,23 @@ function makeFullTimeButton() {
     eFullTime.classList.add("active");
 
     setFullTimeOrInternship("yearly");
+    _SearchYoeFilter();
     resetData();
 }
-
-// Search
-function filterSearchIndexes(ixs) {
-    window.data = [];
-    window.companyData = [];
-    if (document.getElementById("fullTimeButton").classList.contains("active")) {
-        for (i = 0; i < ixs.length; i++) {
-            if (allData[ixs[i]][keyMap["yrOrPm"]] == "yearly") {
-                window.data.push(allData[ixs[i]]);
-                window.companyData.push(allData[ixs[i]]);
-
-            }
-        }
-    }
-    else if (document.getElementById("internshipButton").classList.contains("active")) {
-        for (i = 0; i < ixs.length; i++) {
-            if (allData[ixs[i]][keyMap["yrOrPm"]] == "monthly") {
-                window.data.push(allData[ixs[i]]);
-                window.companyData.push(allData[ixs[i]]);
-            }
-        }
-    }
-}
-
-function debounce(func, timeout = 300) {
-    let timer;
-    return (...args) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => { func.apply(this, args); }, timeout);
-    };
-}
-
-function search(e) {
-    var allIxs = [];
-    if (e.value.length > 2) {
-        txt = e.value.toLowerCase();
-        txtSplits = txt.split(" ");
-        for (i = 0; i < txtSplits.length; i++) {
-            txtToSearch = txtSplits[i];
-            if (txtToSearch in invertedIndex) {
-                allIxs = allIxs.concat(invertedIndex[txtToSearch]);
-            }
-        }
-        allIxs = [...new Set(allIxs)];
-        allIxs.sort(function (a, b) {
-            return a - b;
-        });;
-        filterSearchIndexes(allIxs);
-        // Reset you range (WIP)
-        document.getElementById("minYoe").value = "";
-        document.getElementById("maxYoe").value = "";
-        resetData();
-    }
-}
-const searchText = debounce((e) => search(e));
-
-
-// Min-Max Yoe
-function _yoeFilter(e) {
-    minYoe = document.getElementById("minYoe").value;
-    maxYoe = document.getElementById("maxYoe").value;
-    if (minYoe.length == 0) {
-        minYoe = -0.99;
-    }
-    else {
-        minYoe = parseFloat(minYoe)
-    }
-    if (maxYoe.length == 0) {
-        maxYoe = 30.0;
-    }
-    else {
-        maxYoe = parseFloat(maxYoe)
-    }
-
-
-    dataToFilter = [];
-    if(companyData.length == 0) {
-        dataToFilter = allData;
-    }
-    else{
-        dataToFilter = companyData;
-    }
-    
-    window.data = [];
-    for (i = 0; i < dataToFilter.length; i++) {
-        yoe = parseFloat(dataToFilter[i][keyMap["cleanYoe"]]);
-        if (yoe >= minYoe && yoe <= maxYoe) {
-            window.data.push(dataToFilter[i]);
-        }
-    }
-    // Reset search (WIP)
-    //document.getElementById("search").value = "";
-    resetData();
-}
-const yoeFilter = debounce((e) => _yoeFilter(e));
 
 // Most offers
 document.getElementById("mostOffers").innerHTML = ""
 for (i = 0; i < metaInfo["mostOffersInLastMonth"].length; i++) {
     cc = metaInfo["mostOffersInLastMonth"][i]
-    document.getElementById("mostOffers").innerHTML += "<div class='col'>"
-        + cc[0] + "(" + cc[1] + ")" + "</div>"
+    document.getElementById("mostOffers").innerHTML += "<div class='col'>" +
+        cc[0] + "(" + cc[1] + ")" + "</div>"
 }
 
 // Stats
-document.getElementById("stats").innerHTML = "Total Posts: " + metaInfo["totalPosts"]
-    + " | Posts from India: " + metaInfo["totalPostsFromIndia"]
-    + " | Posts with Total Comp: " + metaInfo["totalPostsWithTotalComp"]
-    + " | Last updated: " + metaInfo["lastUpdated"]
+document.getElementById("stats").innerHTML = "Total Posts: " + metaInfo["totalPosts"] +
+    " | Posts from India: " + metaInfo["totalPostsFromIndia"] +
+    " | Posts with Total Comp: " + metaInfo["totalPostsWithTotalComp"] +
+    " | Last updated: " + metaInfo["lastUpdated"]
 
 
 // Sorting by salary
@@ -486,8 +477,7 @@ function sortBySalary(e) {
             return compareObjectsAsc(post1, post2, e.id);
         });
         sortedAsc = true;
-    }
-    else {
+    } else {
         data.sort((post1, post2) => {
             return compareObjectsDesc(post1, post2, e.id);
         });
@@ -495,3 +485,82 @@ function sortBySalary(e) {
     }
     resetData();
 }
+
+
+// Search and Min-Max yoe
+function debounce(func, timeout = 300) {
+    let timer;
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            func.apply(this, args);
+        }, timeout);
+    };
+}
+
+function filterSearchIndexes(ixs) {
+    if (document.getElementById("fullTimeButton").classList.contains("active")) {
+        for (i = 0; i < ixs.length; i++) {
+            if (allData[ixs[i]][keyMap["yrOrPm"]] == "yearly") {
+                window.data.push(allData[ixs[i]]);
+
+            }
+        }
+    } else if (document.getElementById("internshipButton").classList.contains("active")) {
+        for (i = 0; i < ixs.length; i++) {
+            if (allData[ixs[i]][keyMap["yrOrPm"]] == "monthly") {
+                window.data.push(allData[ixs[i]]);
+            }
+        }
+    }
+}
+
+function search(e) {
+    var allIxs = [];
+    txt = e.value.toLowerCase();
+    txtSplits = txt.split(" ");
+    for (i = 0; i < txtSplits.length; i++) {
+        txtToSearch = txtSplits[i];
+        if (txtToSearch in invertedIndex) {
+            allIxs = allIxs.concat(invertedIndex[txtToSearch]);
+        }
+    }
+    allIxs = [...new Set(allIxs)];
+    allIxs.sort(function (a, b) {
+        return a - b;
+    });;
+    filterSearchIndexes(allIxs);
+}
+
+function _SearchYoeFilter() {
+    minYoe = document.getElementById("minYoe").value;
+    maxYoe = document.getElementById("maxYoe").value;
+    if (minYoe.length == 0) {
+        minYoe = -0.99;
+    } else {
+        minYoe = parseFloat(minYoe)
+    }
+    if (maxYoe.length == 0) {
+        maxYoe = 30.0;
+    } else {
+        maxYoe = parseFloat(maxYoe)
+    }
+
+    window.data = [];
+    if (document.getElementById("search").value.length > 2) {
+        search(document.getElementById("search"));
+    } else {
+        window.data = allData;
+    }
+    tempData = [];
+    for (i = 0; i < window.data.length; i++) {
+        yoe = parseFloat(window.data[i][keyMap["cleanYoe"]]);
+        if (yoe >= minYoe && yoe <= maxYoe) {
+            tempData.push(window.data[i]);
+        }
+    }
+    window.data = tempData;
+    resetData();
+}
+
+const SearchYoeFilter = debounce((e) => _SearchYoeFilter());
