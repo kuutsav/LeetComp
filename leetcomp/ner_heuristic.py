@@ -102,6 +102,8 @@ def _get_standardized_location(title: str, content: str) -> Tuple[str, str]:
     for country in LOCATION_SPECIFICATION.keys():
         if re.findall(r"[\(\s\,\/\|]" + country, title):
             return ("", country)
+    if re.findall(r"[\s\d](lpa|inr|₹|rs)[\s\d\.\(]", content):
+        return ("", "india")
     return ("", "")
 
 
