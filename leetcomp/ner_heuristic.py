@@ -1,5 +1,6 @@
 from collections import Counter
 from datetime import datetime, timedelta
+from distutils.command.clean import clean
 import json
 import os
 import re
@@ -27,8 +28,8 @@ LABEL_SPECIFICATION = {
     "RE_YOE_CLEAN_MONTHS": re.compile(r"^(\d{1,2})\s?months?$"),
     "RE_SALARY": re.compile(r"(salary|base|base pay)\s?[:-]-?\s?(?P<label>[\w\,\₹\$\.\/\-\(\)\`\\u20b9&#8377;\~ ]+)"),
     "RE_LOCATION": re.compile(r"location\s?[:-]-?\s?(?P<label>[\w\,\` ]+)"),
-    "RE_SALARY_TOTAL": re.compile(r"\\ntot?al (1st year\s)?(comp[e|a]nsation|comp|ctc)(\sfor 1st year)?(\s?\(\s?(salary|base).+?\))?(?P<label>.+)"),
-    "RE_SALARY_CLEAN_LPA": re.compile(r"(\d{1,3}(\.\d{1,2})?)\s?(lpa|lakh|lac|l)"),
+    "RE_SALARY_TOTAL": re.compile(r"\\n[\s\-\\t\.]{0,3}?tot?al (1st year\s)?(comp[e|a]nsation|comp|ctc)(\sfor 1st year)?(\s?\(\s?(salary|base).+?\))?(?P<label>.+)"),
+    "RE_SALARY_CLEAN_LPA": re.compile(r"(\d{1,3}(\.\d{1,2})?)\s?(lpa|lakh|lac|l|cr)"),
 }
 # fmt: on
 
@@ -64,24 +65,17 @@ def _find_matches(regex_pattern: Pattern[str], content: str) -> List[str]:
     return matches
 
 
-def _get_info_as_flat_list(
-    companies: List[str],
-    roles: List[str],
-    yoes: List[str],
-    pays: List[str],
-    pays_total: List[str],
-    info: Dict[str, Any],
-) -> List[Dict[str, Any]]:
-    n_info = min([len(companies), len(roles), len(yoes), len(pays)])
+def _get_info_as_flat_list(info: Dict[str, Union[List[str], Dict[str, Any]]]) -> List[Dict[str, Any]]:
+    n_info = min([len(info["companies"]), len(info["roles"]), len(info["yoes"]), len(info["salaries"])])
     expanded_info = []
     for _ in range(n_info):
-        info = info.copy()
-        info["company"] = companies[0]
-        info["role"] = roles[0]
-        info["yoe"] = yoes[0]
-        info["salary"] = pays[0]
-        info["salaryTotal"] = pays_total[0] if pays_total else ""
-        expanded_info.append(info)
+        flat_info: Dict[str, Any] = info["info"].copy()  # type: ignore
+        flat_info["company"] = info["companies"][0]  # type: ignore
+        flat_info["role"] = info["roles"][0]  # type: ignore
+        flat_info["yoe"] = info["yoes"][0]  # type: ignore
+        flat_info["salary"] = info["salaries"][0]  # type: ignore
+        flat_info["salaryTotal"] = info["total_salaries"][0] if info["total_salaries"] else ""  # type: ignore
+        expanded_info.append(flat_info)
     return expanded_info
 
 
@@ -136,6 +130,8 @@ def _get_standardized_salary_for_india(salary: str) -> Tuple[float, str]:
     for m in re.finditer(r"\d{6,7}", salary):
         return (int(float(m.group())), "yearly")
     for m in re.finditer(LABEL_SPECIFICATION["RE_SALARY_CLEAN_LPA"], salary):
+        if m.groups()[-1] == "cr":
+            return (int(float(m.groups()[0]) * 1_0000_000), "yearly")
         return (int(float(m.groups()[0]) * 1_00_000), "yearly")
     return (-1, "yearly")
 
@@ -201,10 +197,11 @@ def _add_clean_yoe_and_salaries(expanded_info: List[Dict[str, Any]], info: Dict[
                     info["salary"].replace(",", "").lower()
                 )
             if info["yrOrPm"] == "yearly":
-                total_salary, _ = _get_standardized_salary_for_india(
-                    info["salaryTotal"].replace(",", "").lower().split("\\n")[0]
-                )
-                if info["cleanSalary"] != -1 and total_salary > info["cleanSalary"]:
+                total_salary_txt = info["salaryTotal"].replace(",", "").lower().split("\\n")[0]
+                if "=" in total_salary_txt:
+                    total_salary_txt = total_salary_txt.split("=")[-1]
+                total_salary, _ = _get_standardized_salary_for_india(total_salary_txt)
+                if info["cleanSalary"] != -1 and total_salary >= info["cleanSalary"]:
                     info["cleanSalaryTotal"] = total_salary
                 else:
                     info["cleanSalaryTotal"] = -1
@@ -338,7 +335,10 @@ def parse_posts_and_save_tagged_info(new_post_ids: List[str]) -> None:
             content[r.id] = clean_content
             companies, roles, yoes, salaries, total_salaries = _find_companies_roles_yoes_salaries(clean_content)
             if companies and roles and yoes and salaries:
-                expanded_info = _get_info_as_flat_list(companies, roles, yoes, salaries, total_salaries, info)
+                expanded_info = _get_info_as_flat_list({
+                    "companies": companies, "roles": roles, "yoes": yoes,
+                    "salaries": salaries, "total_salaries": total_salaries, "info": info
+                })
                 _add_clean_location(expanded_info, _preprocess_text(r.title), clean_content)
                 _add_clean_yoe_and_salaries(expanded_info, info, r.title)
                 raw_info += expanded_info
