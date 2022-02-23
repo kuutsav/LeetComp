@@ -239,15 +239,7 @@ def _add_clean_companies(raw_info: List[Dict[str, Any]]) -> None:
 def _drop_info(raw_info: List[Dict[str, Any]]) -> None:
     for r in raw_info:
         try:
-            del (
-                r["title"],
-                r["yoe"],
-                r["salary"],
-                r["salaryTotal"],
-                r["city"],
-                r["country"],
-                r["content"],
-            )
+            del (r["title"], r["yoe"], r["salary"], r["salaryTotal"], r["city"], r["country"], r["content"])
         except KeyError:
             continue
 

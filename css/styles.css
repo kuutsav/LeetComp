@@ -59,12 +59,14 @@
   width: 90px;
 }
 
-#mostOffers {
-  font-size: small;
+#mostOffers,
+#mostOffers30 {
+  font-size: x-small;
 }
 
-#mostOffersTitle {
-  font-size: small;
+#mostOffersTitle,
+#mostOffers30Title {
+  font-size: x-small;
   margin-top: 10;
   margin-bottom: -10;
   text-align: center;

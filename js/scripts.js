@@ -17,6 +17,9 @@ keyMap = {
     "cleanCompany": 10
 }
 
+baseSalaryLabels = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
+totalSalaryLabels = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155, 160, 165, 170, 175, 180, 185, 190, 195, 200];
+
 // Constants
 var pageSize = 20;
 var nPages = Math.ceil(data.length / pageSize);
@@ -37,109 +40,90 @@ function updatePageCount() {
 
 var tableTbodyRef = document.getElementById("postInfo").getElementsByTagName("tbody")[0];
 
-function getAllBaseSalaries() {
-    var salaries = [];
-    for (i = 0; i < data.length; i++) {
-        salaries.push(data[i][keyMap["cleanSalary"]] / 100000)
+function prepend0orNot(key) {
+    if (parseInt(key) < 10) {
+        return "0" + key;
+    } else {
+        return key;
     }
-    return salaries;
 }
 
-function getAllTotalSalaries() {
-    var salaries = [];
-    for (i = 0; i < data.length; i++) {
-        if (data[i][keyMap["cleanSalaryTotal"]] != -1) {
-            salaries.push(data[i][keyMap["cleanSalaryTotal"]] / 100000);
-        }
+function getAllBaseorTotalSalariesByCuts(baseOrTotal) {
+    var salaries = {};
+    if (baseOrTotal == "cleanSalary") {
+        label = baseSalaryLabels;
+    } else {
+        label = totalSalaryLabels;
     }
-    return salaries;
-}
-
-function plotSalaryBarChartData() {
-    salaries = getAllBaseSalaries();
-    totalSalaries = getAllTotalSalaries();
-    var trace1 = {
-        x: salaries,
-        name: "base",
-        type: "histogram",
-        opacity: 0.5,
-        marker: {
-            color: "green"
-        }
-    };
-    var trace2 = {
-        x: totalSalaries,
-        name: "total",
-        type: "histogram",
-        opacity: 0.5,
-        marker: {
-            color: "red"
-        }
-    };
-    var layout = {
-        title: {
-            text: "# salaries #",
-            font: {
-                size: 12
+    for (i = 0; i < data.length; i++) {
+        salary = data[i][keyMap[baseOrTotal]] / 100000;
+        for (j = 0; j < label.length - 1; j++) {
+            if (salary >= label[j] && salary < label[j + 1]) {
+                key = prepend0orNot(label[j])
+                if (!(key in salaries)) {
+                    salaries[key] = 1;
+                } else {
+                    salaries[key] += 1;
+                }
+                break;
             }
-        },
-        height: 400,
-        margin: {
-            t: 20,
-            l: 0,
-            r: 0
-        },
-        yaxis: {
-            automargin: true
-        },
-        xaxis: {
-            tickprefix: "₹ ",
-            ticksuffix: " lpa"
         }
-    };
-    var salaryBarChart = [trace1, trace2];
-    Plotly.newPlot("salaryBarChart", salaryBarChart, layout);
-}
-plotSalaryBarChartData();
-
-function plotTopCompaniesChartData() {
-    var companies = [];
-    var counts = [];
-    for (i = 0; i < metaInfo["top20Companies"].length; i++) {
-        companies.push(metaInfo["top20Companies"][i][0])
-        counts.push(metaInfo["top20Companies"][i][1])
     }
-    var data = [{
+    var keys = Object.keys(salaries); // or loop over the object to get the array
+    // keys will be in any order
+    keys.sort(); // maybe use custom sort, to change direction use .reverse()
+    // keys now will be in wanted order
+    var salariesXY = [];
+    for (var i = 0; i < keys.length; i++) { // now lets iterate in sort order
+        var key = keys[i];
+        salariesXY.push({
+            "x": "₹" + key + "-" + prepend0orNot(parseInt(key) + 5) + " lpa",
+            "y": salaries[key]
+        })
+    }
+    return salariesXY;
+}
+
+const ctx = document.getElementById('salaryBarChartJs').getContext('2d');
+
+function plotSalaryBarChartData(baseOrTotal) {
+    const chart = new Chart(ctx, {
         type: "bar",
-        x: companies,
-        y: counts,
-        orientation: "v",
-        opacity: 0.5,
-        marker: {
-            color: "green"
+        data: {
+            labels: [],
+            datasets: [{
+                label: "Base Salaries",
+                data: getAllBaseorTotalSalariesByCuts(baseOrTotal),
+                backgroundColor: "rgba(87,177,127,1)",
+            }]
+        },
+        options: {
+            scales: {
+                xAxes: [{
+                    display: false,
+                    barPercentage: 1.3,
+                    ticks: {
+                        max: 10,
+                    }
+                }, {
+                    display: true,
+                    ticks: {
+                        autoSkip: false,
+                        max: 4,
+                    }
+                }],
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            },
+            responsive: true,
+            maintainAspectRatio: false
         }
-    }];
-    var layout = {
-        title: {
-            text: "# top companies (static) #",
-            font: {
-                size: 12
-            }
-        },
-        margin: {
-            t: 20,
-            l: 25
-        },
-        xaxis: {
-            tickfont: {
-                size: 10
-            }
-        },
-        showlegend: false
-    }
-    Plotly.newPlot("topCompaniesBarChart", data, layout);
-}
-plotTopCompaniesChartData();
+    })
+};
+plotSalaryBarChartData("cleanSalary");
 
 function plotSalaryYoeBinsChart() {
     var yoeBin1 = [];
@@ -229,95 +213,6 @@ function plotSalaryYoeBinsChart() {
 }
 plotSalaryYoeBinsChart();
 
-function plotSalaryTotalYoeBinsChart() {
-    var yoeBin1 = [];
-    var yoeBin2 = [];
-    var yoeBin3 = [];
-    var yoeBin4 = [];
-    var yoeBin5 = [];
-    for (i = 0; i < data.length; i++) {
-        if (data[i][keyMap["cleanSalaryTotal"]] != -1) {
-            if (data[i][keyMap["cleanYoe"]] >= 0 && data[i][keyMap["cleanYoe"]] < 1) {
-                yoeBin1.push(data[i][keyMap["cleanSalaryTotal"]]);
-            } else if (data[i][keyMap["cleanYoe"]] >= 1 && data[i][keyMap["cleanYoe"]] < 3) {
-                yoeBin2.push(data[i][keyMap["cleanSalaryTotal"]]);
-            } else if (data[i][keyMap["cleanYoe"]] >= 3 && data[i][keyMap["cleanYoe"]] < 6) {
-                yoeBin3.push(data[i][keyMap["cleanSalaryTotal"]]);
-            } else if (data[i][keyMap["cleanYoe"]] >= 6 && data[i][keyMap["cleanYoe"]] < 9) {
-                yoeBin4.push(data[i][keyMap["cleanSalaryTotal"]]);
-            } else if (data[i][keyMap["cleanYoe"]] >= 9) {
-                yoeBin5.push(data[i][keyMap["cleanSalaryTotal"]]);
-            }
-        }
-    }
-    var trace1 = {
-        y: yoeBin1,
-        type: "box",
-        name: "0-1",
-        opacity: 0.5,
-        marker: {
-            color: "red"
-        }
-    };
-    var trace2 = {
-        y: yoeBin2,
-        type: "box",
-        name: "1-3",
-        opacity: 0.5,
-        marker: {
-            color: "red"
-        }
-    };
-    var trace3 = {
-        y: yoeBin3,
-        type: "box",
-        name: "3-6",
-        opacity: 0.5,
-        marker: {
-            color: "red"
-        }
-    };
-    var trace4 = {
-        y: yoeBin4,
-        type: "box",
-        name: "6-9",
-        opacity: 0.5,
-        marker: {
-            color: "red"
-        }
-    };
-    var trace5 = {
-        y: yoeBin5,
-        type: "box",
-        name: "9+",
-        opacity: 0.5,
-        marker: {
-            color: "red"
-        }
-    };
-    var layout = {
-        title: {
-            text: "# yoe bins (total) #",
-            font: {
-                size: 12
-            }
-        },
-        margin: {
-            t: 20,
-            l: 30
-        },
-        xaxis: {
-            tickfont: {
-                size: 10
-            }
-        },
-        showlegend: false
-    }
-
-    var traces = [trace1, trace2, trace3, trace4, trace5];
-    Plotly.newPlot("salaryTotalYoeBinsChart", traces, layout);
-}
-plotSalaryTotalYoeBinsChart();
 
 function getFormattedYoe(yoe) {
     if (yoe == -1) {
@@ -431,9 +326,16 @@ function makeFullTimeButton() {
 
 // Most offers
 document.getElementById("mostOffers").innerHTML = ""
+for (i = 0; i < Math.min(metaInfo["top20Companies"].length, 10); i++) {
+    cc = metaInfo["top20Companies"][i]
+    document.getElementById("mostOffers").innerHTML += "<div class='col'>" +
+        cc[0] + "(" + cc[1] + ")" + "</div>"
+}
+
+document.getElementById("mostOffers30").innerHTML = ""
 for (i = 0; i < metaInfo["mostOffersInLastMonth"].length; i++) {
     cc = metaInfo["mostOffersInLastMonth"][i]
-    document.getElementById("mostOffers").innerHTML += "<div class='col'>" +
+    document.getElementById("mostOffers30").innerHTML += "<div class='col'>" +
         cc[0] + "(" + cc[1] + ")" + "</div>"
 }
 
