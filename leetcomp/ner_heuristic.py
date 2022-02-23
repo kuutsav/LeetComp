@@ -115,7 +115,14 @@ def _get_standardized_yoe(yoe: str, clean_title: str, role: str) -> float:
     for m in re.finditer(LABEL_SPECIFICATION["RE_YOE_CLEAN_MONTHS"], yoe):
         return round(float(m.groups()[0]) / 12, 1)
     if not yoe:
-        if "intern" in clean_title or "intern" in role:
+        if (
+            "intern" in clean_title
+            or "intern" in role
+            or "intern" in yoe
+            or "fresher" in clean_title
+            or "fresher" in role
+            or "fresher" in yoe
+        ):
             return 0.0
     for m in re.finditer(LABEL_SPECIFICATION["RE_YOE_CLEAN"], yoe):
         groups = m.groups()
