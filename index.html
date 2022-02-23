@@ -13,7 +13,8 @@
 
 <body>
     <div class="container">
-        <h1 id="leetComp" class="col">💸 LeetComp 💸</h1>
+        <!-- Top Banner -->
+        <h2 id="leetComp" class="col">LeetComp: Leetcode compensations</h2>
         <div style="text-align: center;">
             <a href="https://github.com/kuutsav/LeetComp/stargazers">
                 <img alt="star this repo" src="https://img.shields.io/github/stars/kuutsav/LeetComp?style=social">
@@ -26,27 +27,38 @@
                 compensations page (only supports posts from <b>India</b> at the moment)
             </div>
         </div>
+        <!-- Total - Base pay toggle -->
+        <div class="btn-group btn-group-toggle">
+            <label class="btn btn-secondary active" onclick="makeTotalPayButton()" id="totalPayButton">Total Pay</label>
+            <label class="btn btn-secondary" onclick="makeBasePayButton()" id="basePayButton">Base Pay</label>
+        </div>
+        <br><br>
+        <!-- Charts -->
         <div class="row">
-            <div id="salaryBarChart">
+            <div id="salaryBarChart" style="height: 350px;" class="col-8">
+                <canvas id="salaryBarChartJs" width="400" height="400"></canvas>
                 <!-- Salary bar chart -->
             </div>
-        </div>
-        <div class="row">
-            <div id="salaryYoeBinsChart" class="col-4">
-                <!-- Yoe salary bins box plots -->
-            </div>
-            <div id="salaryTotalYoeBinsChart" class="col-4">
-                <!-- Yoe salary(total) bins box plots -->
-            </div>
-            <div id="topCompaniesBarChart" class="col-4">
-                <!-- Top companies bar chart -->
+            <div id="salaryYoeBinsChart" style="height: 350px;" class="col-4">
+                <canvas id="salaryYoeBinsChartJs" width="400" height="400"></canvas>
+                <!-- Salary Yoe bins chart -->
             </div>
         </div>
-        <div id="mostOffersTitle">📈 Most offers in the last 30 days (static list)</div>
+        <br><br>
+        <!-- Static content -->
+        <div id="mostOffersTitle"><b>📈 Most offers so far (static list)</b></div>
         <hr>
         <div class="row" id="mostOffers"></div>
         <hr>
+        <br>
+        <div id="mostOffers30Title"><b>📈 Most offers in the last 30 days (static list)</b></div>
+        <hr>
+        <div class="row" id="mostOffers30"></div>
+        <hr>
+        <br>
+        <!-- Data Table controls -->
         <div class="row">
+            <!-- Full Time - Internship toggle -->
             <div class="col-auto mr-auto">
                 <div class="btn-group btn-group-toggle">
                     <label class="btn btn-secondary active" onclick="makeFullTimeButton()" id="fullTimeButton">Full
@@ -55,16 +67,19 @@
                         id="internshipButton">Internship</label>
                 </div>
             </div>
+            <!-- Search -->
             <div class="col-auto mr-auto">
                 <input type="search" class="form-control-sm rounded" placeholder="Search" aria-label="Search"
                     aria-describedby="search-addon" id="search" onkeyup="SearchYoeFilter()" />
             </div>
+            <!-- Min - Max Yoe filter -->
             <div class="col-auto mr-auto">
-                <input type="search" class="form-control-sm rounded" placeholder="min yoe" aria-label="minYoe"
-                    aria-describedby="min-yoe" id="minYoe" onkeyup="SearchYoeFilter()" />
-                <input type="search" class="form-control-sm rounded" placeholder="max yoe" aria-label="maxYoe"
-                    aria-describedby="max-yoe" id="maxYoe" onkeyup="SearchYoeFilter()" />
+                <input type="search" class="form-control-sm rounded" placeholder="#" aria-label="minYoe"
+                    aria-describedby="min-yoe" id="minYoe" onkeyup="SearchYoeFilter()" /> to
+                <input type="search" class="form-control-sm rounded" placeholder="#" aria-label="maxYoe"
+                    aria-describedby="max-yoe" id="maxYoe" onkeyup="SearchYoeFilter()" /> YOE
             </div>
+            <!-- Pagination -->
             <div class="col-auto mr-auto text-muted" id="nRows"></div>
             <nav aria-label="Page navigation example" class="col-auto ms-auto">
                 <ul class="pagination">
@@ -90,11 +105,12 @@
                 </ul>
             </nav>
         </div>
+        <!-- Data Table -->
         <table id="postInfo" class="table table-hover">
             <thead>
                 <tr>
-                    <th scope="col" style="width:23%">Company</th>
-                    <th scope="col" style="width:23%">Role</th>
+                    <th scope="col" style="width:22%">Company</th>
+                    <th scope="col" style="width:22%">Role</th>
                     <th scope="col" style="width:10%">Yoe <span class="sortButton" onclick="sortBySalary(this)"
                             id="cleanYoe">▾</span></th>
                     <th scope="col" style="width:14%">Salary <span class="sortButton" onclick="sortBySalary(this)"
@@ -102,11 +118,11 @@
                             id="cleanSalaryTotal">▾</span></th>
                     <th scope="col" style="width:10%">Date <span class="sortButton" onclick="sortBySalary(this)"
                             id="date">▾</span></th>
-                    <th scope="col" style="width:8%">Views <span class="sortButton" onclick="sortBySalary(this)"
+                    <th scope="col" style="width:10%">Views <span class="sortButton" onclick="sortBySalary(this)"
                             id="viewCount">▾</span></th>
-                    <th scope="col" style="width:8%">Votes <span class="sortButton" onclick="sortBySalary(this)"
+                    <th scope="col" style="width:10%">Votes <span class="sortButton" onclick="sortBySalary(this)"
                             id="voteCount">▾</span></th>
-                    <th scope="col" style="width:4%">PostId</th>
+                    <th scope="col" style="width:2%">PostId</th>
                 </tr>
             </thead>
             <tbody>
@@ -119,11 +135,12 @@
             theme="github-light" crossorigin="anonymous" async></script>
     </div>
 
-    <script src="js/data.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.plot.ly/plotly-2.8.3.min.js"></script>
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous">
+    </script>
+    <script src="js/data.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/@sgratzl/chartjs-chart-boxplot@3.6.0/build/index.umd.min.js"></script>
     <script src="js/scripts.js"></script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-G5Y6PERW9N"></script>
     <script>

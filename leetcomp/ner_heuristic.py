@@ -115,7 +115,14 @@ def _get_standardized_yoe(yoe: str, clean_title: str, role: str) -> float:
     for m in re.finditer(LABEL_SPECIFICATION["RE_YOE_CLEAN_MONTHS"], yoe):
         return round(float(m.groups()[0]) / 12, 1)
     if not yoe:
-        if "intern" in clean_title or "intern" in role:
+        if (
+            "intern" in clean_title
+            or "intern" in role
+            or "intern" in yoe
+            or "fresher" in clean_title
+            or "fresher" in role
+            or "fresher" in yoe
+        ):
             return 0.0
     for m in re.finditer(LABEL_SPECIFICATION["RE_YOE_CLEAN"], yoe):
         groups = m.groups()
@@ -239,15 +246,7 @@ def _add_clean_companies(raw_info: List[Dict[str, Any]]) -> None:
 def _drop_info(raw_info: List[Dict[str, Any]]) -> None:
     for r in raw_info:
         try:
-            del (
-                r["title"],
-                r["yoe"],
-                r["salary"],
-                r["salaryTotal"],
-                r["city"],
-                r["country"],
-                r["content"],
-            )
+            del (r["title"], r["yoe"], r["salary"], r["salaryTotal"], r["city"], r["country"], r["content"])
         except KeyError:
             continue
 
