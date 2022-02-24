@@ -130,7 +130,7 @@ function getBoxPlotData(baseOrTotal, minYoe, maxYoe) {
 }
 
 function plotSalaryBarChartData(baseOrTotal) {
-    document.getElementById("salaryBarChart").innerHTML = '<canvas id="salaryBarChartJs" width="400" height="400"></canvas>';
+    document.getElementById("salaryBarChart").innerHTML = '<canvas id="salaryBarChartJs" width="350" height="350"></canvas>';
     const ctx = document.getElementById("salaryBarChartJs").getContext("2d");
     if (baseOrTotal == "cleanSalary") {
         label = "base pay";
@@ -157,7 +157,7 @@ function plotSalaryBarChartData(baseOrTotal) {
                 y: {
                     grid: {
                         display: false
-                    }
+                    },
                 }
             },
             responsive: true,
@@ -165,7 +165,7 @@ function plotSalaryBarChartData(baseOrTotal) {
             plugins: {
                 title: {
                     display: true,
-                    text: "yearly pay (x) / bin counts (y)",
+                    // text: "yearly pay (x) / bin counts (y)",
                     font: {
                         size: 9
                     }
@@ -180,7 +180,7 @@ function plotSalaryBarChartData(baseOrTotal) {
 plotSalaryBarChartData("cleanSalaryTotal");
 
 function plotSalaryYoeBinsChartData(baseOrTotal) {
-    document.getElementById("salaryYoeBinsChart").innerHTML = '<canvas id="salaryYoeBinsChartJs" width="400" height="400"></canvas>';
+    document.getElementById("salaryYoeBinsChart").innerHTML = '<canvas id="salaryYoeBinsChartJs" width="300" height="300"></canvas>';
     const ctx = document.getElementById("salaryYoeBinsChartJs").getContext("2d");
     if (baseOrTotal == "cleanSalary") {
         label = "base pay";
@@ -202,23 +202,32 @@ function plotSalaryYoeBinsChartData(baseOrTotal) {
         },
         options: {
             scales: {
-                x: {
+                yAxis: {
+                    display: true,
+                    ticks: {
+                        callback: function(value, index, values) {
+                            return "₹" + value + " lpa";
+                        }
+                    },
                     grid: {
                         display: false
                     }
                 },
-                y: {
+                x: {
                     grid: {
                         display: false
+                    },
+                    ticks: {
+                        minRotation: 50
                     }
-                }
+                },
             },
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
                 title: {
                     display: true,
-                    text: "yoe bins (x) / yearly pay in ₹ lpa (y)",
+                    // text: "yoe bins (x) / yearly pay in ₹ lpa (y)",
                     font: {
                         size: 9
                     }
@@ -237,11 +246,83 @@ function plotSalaryYoeBinsChartData(baseOrTotal) {
 };
 plotSalaryYoeBinsChartData("cleanSalaryTotal");
 
+function getCountByMonth() {
+    var countByMonth = {};
+    for (i = 0; i < data.length; i++) {
+        key = data[i][keyMap["date"]].substr(2, 5);
+        if (!(key in countByMonth)) {
+            countByMonth[key] = 1;
+        } else {
+            countByMonth[key] += 1;
+        }
+    }
+    var sortedCountByMonth = {};
+    var keys = Object.keys(countByMonth);
+    keys.sort();
+    for (var i = 0; i < keys.length; i++) {
+        sortedCountByMonth[keys[i]] = countByMonth[keys[i]];
+    }
+    return sortedCountByMonth;
+}
+
+function plotCountsByMonthChart() {
+    document.getElementById("countsByMonthChart").innerHTML = '<canvas id="countsByMonthChartJs" width="300" height="300"></canvas>';
+    const ctx = document.getElementById("countsByMonthChartJs").getContext("2d");
+    counts = getCountByMonth();
+    new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: Object.keys(counts),
+            datasets: [{
+                label: "",
+                data: Object.values(counts),
+                backgroundColor: "rgba(87,177,127,1)",
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        display: true,
+                        autoSkip: true,
+                        maxTicksLimit: 12,
+                        minRotation: 30
+                    }
+                },
+                y: {
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    // text: "yearly pay (x) / bin counts (y)",
+                    font: {
+                        size: 9
+                    }
+                },
+                legend: {
+                    display: false
+                }
+            }
+        }
+    })
+};
+plotCountsByMonthChart();
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////// Buttons
 function resetData() {
     plotSalaryBarChartData(getActiveBaseOrTotalPay());
     plotSalaryYoeBinsChartData(getActiveBaseOrTotalPay());
+    plotCountsByMonthChart();
     updatePageCount();
     updatePostsTableContent(0, pageSize);
     resetNavPageNo();
@@ -325,7 +406,7 @@ function resetNavPageNo() {
 }
 
 function updateNRows() {
-    document.getElementById("nRows").innerHTML = "# rows: " + data.length
+    document.getElementById("nRows").innerHTML = data.length + " rows"
 }
 updateNRows();
 
@@ -360,17 +441,16 @@ function updatePostsTableContent(startIndex, endIndex) {
     var myHtmlContent = "";
     endIndex = Math.min(data.length, endIndex)
     for (var i = startIndex; i < endIndex; i++) {
-        myHtmlContent += "<tr><td>" + data[i][keyMap["company"]] + "</td>";
-        myHtmlContent += "<td>" + data[i][keyMap["role"]].toLowerCase() + "</td>";
+        myHtmlContent += "<tr><td><span class='primaryText'>" + data[i][keyMap["company"]] + "</span><p class='secondaryText'>" + 
+            data[i][keyMap["role"]] + "</p></td>";
         myHtmlContent += "<td>" + getFormattedYoe(data[i][keyMap["cleanYoe"]]) + "</td>";
-        myHtmlContent += "<td>base: ₹ " + data[i][keyMap["cleanSalary"]].toLocaleString("en-IN");
-        myHtmlContent += "<br>total: " + getFormattedTotalSalary(data[i][keyMap["cleanSalaryTotal"]]) + "</td>";
+        myHtmlContent += "<td>total: " + getFormattedTotalSalary(data[i][keyMap["cleanSalaryTotal"]]);
+        myHtmlContent += "<p class='secondaryText'>base: ₹ " + data[i][keyMap["cleanSalary"]].toLocaleString("en-IN") + "</p></td>";
         myHtmlContent += "<td>" + data[i][keyMap["date"]] + "</td>";
-        myHtmlContent += "<td>" + data[i][keyMap["viewCount"]] + "</td>";
-        myHtmlContent += "<td>" + data[i][keyMap["voteCount"]] + "</td>";
-        myHtmlContent += "<td><a href=https://leetcode.com/discuss/compensation/" + data[i][keyMap["id"]] + ">" +
-            data[i][keyMap["id"]] +
-            "</a></td></tr>";
+        myHtmlContent += "<td>" + data[i][keyMap["voteCount"]] + "<p class='secondaryText'>(" +
+            data[i][keyMap["viewCount"]] + ")</p></td>";
+        myHtmlContent += "<td><a class='postHref' href=https://leetcode.com/discuss/compensation/" + data[i][keyMap["id"]] + ">" +
+            data[i][keyMap["id"]] + "</a></td></tr>";
     }
     tableTbodyRef.innerHTML = myHtmlContent;
 };
@@ -380,14 +460,14 @@ updatePostsTableContent(0, pageSize);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////// Static content
 // Most offers
 document.getElementById("mostOffers").innerHTML = ""
-for (i = 0; i < Math.min(metaInfo["top20Companies"].length, 10); i++) {
+for (i = 0; i < Math.min(metaInfo["top20Companies"].length, 8); i++) {
     cc = metaInfo["top20Companies"][i]
     document.getElementById("mostOffers").innerHTML += '<div class="col">' +
         cc[0] + "(" + cc[1] + ")" + "</div>"
 }
 
 document.getElementById("mostOffers30").innerHTML = ""
-for (i = 0; i < metaInfo["mostOffersInLastMonth"].length; i++) {
+for (i = 0; i < Math.min(metaInfo["mostOffersInLastMonth"].length, 8); i++) {
     cc = metaInfo["mostOffersInLastMonth"][i]
     document.getElementById("mostOffers30").innerHTML += '<div class="col">' +
         cc[0] + "(" + cc[1] + ")" + "</div>"
