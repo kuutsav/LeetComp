@@ -4,11 +4,23 @@
 }
 
 .container {
+  max-width: 1000px;
   font-size: x-small;
+}
+
+#headBanner {
+  background-color: #D9ECF7;
+  color: #30718F;
 }
 
 #postInfo {
   font-size: small;
+  border: 1px solid #ddd;
+}
+
+#postInfo thead {
+  background-color: #D9ECF7;
+  color: #505050;
 }
 
 .btn-danger {
@@ -77,5 +89,26 @@
 }
 
 .sortButton {
+  cursor: pointer;
+}
+
+.secondaryText {
+  font-size: smaller;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.primaryText {
+  color: #30718F;
+  font-weight: 500;
+}
+
+.postHref {
+  text-decoration: none;
+  color: #000000;
+  border-bottom: 1px dotted #000;
+}
+
+.pagination {
   cursor: pointer;
 }
