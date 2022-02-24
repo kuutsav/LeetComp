@@ -27,6 +27,10 @@ input[type="search"] {
   color: #505050;
 }
 
+#postInfo tbody {
+  border-top: 2px solid #aaa;
+}
+
 .btn-danger {
   font-size: xx-small;
   color: #fff;
