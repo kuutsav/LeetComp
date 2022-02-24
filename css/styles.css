@@ -1,3 +1,7 @@
+input[type="search"] {
+  -webkit-appearance: none;
+}
+
 #leetComp {
   text-align: center;
   margin-top: 20px;
@@ -72,7 +76,7 @@
 
 #minYoe,
 #maxYoe {
-  width: 40px;
+  width: 50px;
 }
 
 #mostOffers,
