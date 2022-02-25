@@ -25,6 +25,7 @@ input[type="search"] {
 #postInfo thead {
   background-color: #D9ECF7;
   color: #505050;
+  font-size: smaller;
 }
 
 #postInfo tbody {

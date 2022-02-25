@@ -19,10 +19,9 @@ keyMap = {
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////// Constants and Methods
-baseSalaryLabels = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
-totalSalaryLabels = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100,
-    105, 110, 115, 120, 125, 130, 135, 140, 145, 150, 155, 160, 165, 170, 175, 180, 185, 190, 195, 200
-];
+const stepSize = 2;
+baseSalaryLabels = [...Array(51)].map((_, i) => 0 + i * stepSize);
+totalSalaryLabels = [...Array(101)].map((_, i) => 0 + i * stepSize);
 
 var pageSize = 20;
 var nPages = Math.ceil(data.length / pageSize);
@@ -86,15 +85,18 @@ function getAllBaseorTotalSalariesByCuts(baseOrTotal) {
     for (var i = 0; i < keyValues.length; i++) {
         key = keyValues[i][0];
         salariesXY.push({
-            "x": "₹" + parseInt(key) + "-" + (parseInt(key) + 5) + " lpa",
+            "x": "₹" + parseInt(key) + "-" + (parseInt(key) + stepSize) + " lpa",
             "y": keyValues[i][1]
         })
     }
+    console.log(salariesXY)
     return salariesXY;
 }
 
 function getPercentile(data, percentile) {
-    data.sort(numSort);
+    data.sort(function (a, b) {
+        return a - b;
+    });
     var index = (percentile / 100) * data.length;
     var result;
     if (Math.floor(index) == index) {
@@ -103,10 +105,6 @@ function getPercentile(data, percentile) {
         result = data[Math.floor(index)];
     }
     return result;
-}
-
-function numSort(a, b) {
-    return a - b;
 }
 
 function getBoxPlotData(baseOrTotal, minYoe, maxYoe) {
@@ -152,6 +150,13 @@ function plotSalaryBarChartData(baseOrTotal) {
                 x: {
                     grid: {
                         display: false
+                    },
+                    ticks: {
+                        display: true,
+                        autoSkip: true,
+                        maxTicksLimit: 12,
+                        minRotation: 30,
+                        maxRotation: 30
                     }
                 },
                 y: {
@@ -218,7 +223,8 @@ function plotSalaryYoeBinsChartData(baseOrTotal) {
                         display: false
                     },
                     ticks: {
-                        minRotation: 50
+                        minRotation: 30,
+                        maxRotation: 30
                     }
                 },
             },
@@ -288,8 +294,9 @@ function plotCountsByMonthChart() {
                     ticks: {
                         display: true,
                         autoSkip: true,
-                        maxTicksLimit: 12,
-                        minRotation: 30
+                        maxTicksLimit: 9,
+                        minRotation: 30,
+                        maxRotation: 30
                     }
                 },
                 y: {

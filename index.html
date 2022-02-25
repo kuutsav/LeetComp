@@ -24,11 +24,13 @@
         <div class="alert alert-primary" id="headBanner" role="alert">
             <div style="font-size: small;">
                 LeetComp works by regularly fetching and parsing new posts from the leetcode
-                compensations page (only supports posts from <b>India</b> at the moment).
-                <strong>Chart 1</strong> shows salary distribution; x axis has the salary ranges and y axis has the counts
-                for that range. <strong>Chart 2</strong> shows salary distribution by yoe bins; x axis has the yoe bins and
-                y axis has the annual salary in ₹LPA. <strong>Chart 3</strong> shows number of offers by month; x axis
-                has the month and y axis has the offer counts.
+                compensations page (only supports posts from <b>India</b> at the moment).<br>
+                <span style="font-size: smaller;">(<strong>Chart 1</strong> shows salary distribution; x axis has the
+                    salary ranges and y axis has the counts for that range. <strong>Chart 2</strong> shows salary
+                    distribution by yoe bins; x axis has the yoe bins and y axis has the annual salary in ₹LPA.
+                    <strong>Chart 3</strong> shows number of offers by month;
+                    x axis has the month and y axis has the offer counts.)
+                </span>
             </div>
         </div>
         <!-- Total - Base pay toggle -->
@@ -38,18 +40,18 @@
         </div>
         <!-- Charts -->
         <div class="row">
-            <div id="salaryBarChart" style="height: 350px;" class="col-12">
-                <canvas id="salaryBarChartJs" width="350" height="350"></canvas>
+            <div id="salaryBarChart" style="height: 300px;" class="col-12">
+                <canvas id="salaryBarChartJs" width="300" height="300"></canvas>
                 <!-- Salary bar chart -->
             </div>
         </div>
         <div class="row">
-            <div id="salaryYoeBinsChart" style="height:290px;" class="col-4">
-                <canvas id="salaryYoeBinsChartJs" width="300" height="300"></canvas>
+            <div id="salaryYoeBinsChart" style="height:264px;" class="col-4">
+                <canvas id="salaryYoeBinsChartJs" width="270" height="270"></canvas>
                 <!-- Salary Yoe bins chart -->
             </div>
-            <div id="countsByMonthChart" style="height: 300px;" class="col-8">
-                <canvas id="countsByMonthChartJs" width="300" height="300"></canvas>
+            <div id="countsByMonthChart" style="height: 270px;" class="col-8">
+                <canvas id="countsByMonthChartJs" width="270" height="270"></canvas>
                 <!-- Salary Yoe bins chart -->
             </div>
         </div>
@@ -71,7 +73,8 @@
                 <div class="btn-group btn-group-toggle">
                     <label class="btn btn-secondary active" onclick="makeFullTimeButton()" id="fullTimeButton">Full
                         Time</label>
-                    <label class="btn btn-secondary" onclick="makeInternButton()" id="internshipButton">Internship</label>
+                    <label class="btn btn-secondary" onclick="makeInternButton()"
+                        id="internshipButton">Internship</label>
                 </div>
             </div>
             <!-- Search -->
@@ -96,15 +99,15 @@
                         <p class="secondaryText secondaryTheadText">Role</p>
                     </th>
                     </th>
-                    <th scope="col" style="width:13%">Yoe<span class="sortButton" onclick="sortBySalary(this)" id="cleanYoe">
-                            ▾</span></th>
+                    <th scope="col" style="width:13%">Yoe<span class="sortButton" onclick="sortBySalary(this)"
+                            id="cleanYoe">&nbsp;▾</span></th>
                     <th scope="col" style="width:22%">Salary<span class="sortButton" onclick="sortBySalary(this)"
-                            id="cleanSalaryTotal"> ▾</span><span class="sortButton" onclick="sortBySalary(this)" id="cleanSalary">
-                            ▾</span></th>
-                    <th scope="col" style="width:15%">Date<span class="sortButton" onclick="sortBySalary(this)" id="date">
-                            ▾</span></th>
-                    <th scope="col" style="width:10%">Votes<span class="sortButton" onclick="sortBySalary(this)" id="voteCount">
-                            ▾</span>
+                            id="cleanSalaryTotal">&nbsp;▾</span><span class="sortButton" onclick="sortBySalary(this)"
+                            id="cleanSalary">&nbsp;▾</span></th>
+                    <th scope="col" style="width:15%">Date<span class="sortButton" onclick="sortBySalary(this)"
+                            id="date">&nbsp;▾</span></th>
+                    <th scope="col" style="width:10%">Votes<span class="sortButton" onclick="sortBySalary(this)"
+                            id="voteCount">&nbsp;▾</span>
                         <p class="secondaryText secondaryTheadText">Views</p>
                     </th>
                     <th scope="col" style="width:5%">PostId</th>
@@ -136,8 +139,8 @@
             </ul>
         </nav>
         <div id="stats"></div>
-        <div style="text-align: center;">Inspired by 
-            <a href="https://www.levels.fyi/Salaries/Software-Engineer/India/">levels.fyi</a> and 
+        <div style="text-align: center;">Inspired by
+            <a href="https://www.levels.fyi/Salaries/Software-Engineer/India/">levels.fyi</a> and
             <a href="http://csrankings.org/">csrankings.org</a>
         </div>
         <hr>
