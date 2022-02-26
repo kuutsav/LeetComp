@@ -345,10 +345,6 @@ def parse_posts_and_save_tagged_info(new_post_ids: List[str]) -> None:
     raw_info = []; n_posts_dropped = 0; total_posts = 0; content = {}
     with session_scope() as session:
         for r in session.query(Posts).all():
-
-            # if r.id not in new_post_ids:
-            #     continue
-
             total_posts += 1
             info = {"id": r.id, "title": r.title, "voteCount": r.voteCount, "viewCount": r.viewCount,
                     "date": datetime.fromtimestamp(int(r.creationDate)).strftime("%Y-%m-%d"), "content": r.content}
@@ -368,7 +364,3 @@ def parse_posts_and_save_tagged_info(new_post_ids: List[str]) -> None:
                 n_posts_dropped += 1
     # fmt: on
     _post_process_report_and_save_data(total_posts, n_posts_dropped, raw_info, new_post_ids)
-
-
-if __name__ == "__main__":
-    parse_posts_and_save_tagged_info(["1783811"])
