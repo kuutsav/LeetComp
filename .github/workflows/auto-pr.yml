@@ -2,7 +2,8 @@
 name: Staging Auto-PR
 
 on:
-  push
+  push:
+    branches: [develop]
   schedule:
     - cron: "*/1 * * * *"
 
