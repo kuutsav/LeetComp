@@ -2,7 +2,7 @@
 name: Staging Auto-PR
 
 on:
-push
+  push
   schedule:
     - cron: "*/1 * * * *"
 
