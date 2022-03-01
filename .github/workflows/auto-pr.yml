@@ -5,7 +5,7 @@ on:
   push:
     branches: ["develop"]
   schedule:
-        - cron: "38 17 * * *" # runs at 00:00 UTC everyday
+        - cron: "15 23 * * *" # runs at 00:00 UTC everyday
 
 jobs:
   pull-request:
