@@ -153,4 +153,3 @@ inverted_index.json
 tests/tmp/*.json
 tests/tmp/*.db
 tests/tmp/*.js
-
