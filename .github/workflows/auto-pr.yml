@@ -1,0 +1,30 @@
+---
+name: Staging Auto-PR
+
+on:
+  push:
+    branches: ["develop"]
+  schedule:
+        - cron: "36 17 * * *" # runs at 00:00 UTC everyday
+
+jobs:
+  pull-request:
+    name: Open PR to main with updated data
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      name: checkout
+
+    - uses: repo-sync/pull-request@v2
+      name: pull-request
+      with:
+        destination_branch: "main"
+        pr_title: "[Data Refresh] Pulling ${{ github.ref }} into main"
+        pr_body: "*An automated PR*"
+        pr_reviewer: "kuutsav"
+        pr_draft: true
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: execute py script # run the update.py to get the latest data
+      run: |
+        python update.py
