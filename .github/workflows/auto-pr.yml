@@ -3,7 +3,7 @@ name: Staging Auto-PR
 
 on:
   schedule:
-    - cron: "38 12 * * *" # runs at 00:00 UTC everyday
+    - cron: "*/1 * * * *"
 
 jobs:
   pull-request:
