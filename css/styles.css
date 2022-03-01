@@ -1,14 +1,35 @@
+input[type="search"] {
+  -webkit-appearance: none;
+}
+
 #leetComp {
   text-align: center;
   margin-top: 20px;
 }
 
 .container {
+  max-width: 1000px;
   font-size: x-small;
+}
+
+#headBanner {
+  background-color: #D9ECF7;
+  color: #30718F;
 }
 
 #postInfo {
   font-size: small;
+  border: 1px solid #ddd;
+}
+
+#postInfo thead {
+  background-color: #D9ECF7;
+  color: #505050;
+  font-size: smaller;
+}
+
+#postInfo tbody {
+  border-top: 2px solid #aaa;
 }
 
 .btn-danger {
@@ -54,22 +75,54 @@
   padding-top: 5px;
 }
 
+#search {
+  width: 150px;
+}
+
 #minYoe,
 #maxYoe {
-  width: 90px;
+  width: 50px;
 }
 
-#mostOffers {
-  font-size: small;
+#mostOffers,
+#mostOffers30 {
+  font-size: x-small;
 }
 
-#mostOffersTitle {
-  font-size: small;
+#mostOffersTitle,
+#mostOffers30Title {
+  font-size: x-small;
   margin-top: 10;
   margin-bottom: -10;
   text-align: center;
 }
 
 .sortButton {
+  cursor: pointer;
+}
+
+.secondaryText {
+  font-size: smaller;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.secondaryTheadText {
+  margin-top: 5px;
+  margin-bottom: 0px;
+}
+
+.primaryText {
+  color: #30718F;
+  font-weight: 500;
+}
+
+.postHref {
+  text-decoration: none;
+  color: #000000;
+  border-bottom: 1px dotted #000;
+}
+
+.pagination {
   cursor: pointer;
 }

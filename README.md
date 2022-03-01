@@ -11,6 +11,8 @@ Analysing compensations mentioned on the Leetcode forums (https://kuutsav.github
 
 LeetComp works by regularly fetching new posts from the [leetcode compensations page](https://leetcode.com/discuss/compensation). The `leetcomp` directory contains python scripts to fetch and parse new posts. New posts are updated in `posts.db`, a SQLite database. The parsed posts are updated directly into `js/data.js` which helps power the content in `index.html`.
 
+IMO, this tool can be best used to figure out the "software developer salaries in india" across various experience levels.
+
 ---
 
 The app is hosted at https://kuutsav.github.io/LeetComp/ using github pages.

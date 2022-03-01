@@ -1,4 +1,4 @@
-// Data
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////// Data
 var data = [];
 var companyData = [];
 
@@ -17,7 +17,12 @@ keyMap = {
     "cleanCompany": 10
 }
 
-// Constants
+
+////////////////////////////////////////////////////////////////////////////////////////////////// Constants and Methods
+const stepSize = 2;
+baseSalaryLabels = [...Array(51)].map((_, i) => 0 + i * stepSize);
+totalSalaryLabels = [...Array(101)].map((_, i) => 0 + i * stepSize);
+
 var pageSize = 20;
 var nPages = Math.ceil(data.length / pageSize);
 
@@ -37,324 +42,341 @@ function updatePageCount() {
 
 var tableTbodyRef = document.getElementById("postInfo").getElementsByTagName("tbody")[0];
 
-function getAllBaseSalaries() {
-    var salaries = [];
-    for (i = 0; i < data.length; i++) {
-        salaries.push(data[i][keyMap["cleanSalary"]] / 100000)
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////// Plots
+function prepend0orNot(key) {
+    if (parseInt(key) < 10) {
+        return "0" + key;
+    } else {
+        return key;
     }
-    return salaries;
 }
 
-function getAllTotalSalaries() {
-    var salaries = [];
-    for (i = 0; i < data.length; i++) {
-        if (data[i][keyMap["cleanSalaryTotal"]] != -1) {
-            salaries.push(data[i][keyMap["cleanSalaryTotal"]] / 100000);
-        }
+function getAllBaseorTotalSalariesByCuts(baseOrTotal) {
+    var salaries = {};
+    if (baseOrTotal == "cleanSalary") {
+        label = baseSalaryLabels;
+    } else {
+        label = totalSalaryLabels;
     }
-    return salaries;
-}
-
-function plotSalaryBarChartData() {
-    salaries = getAllBaseSalaries();
-    totalSalaries = getAllTotalSalaries();
-    var trace1 = {
-        x: salaries,
-        name: "base",
-        type: "histogram",
-        opacity: 0.5,
-        marker: {
-            color: "green"
-        }
-    };
-    var trace2 = {
-        x: totalSalaries,
-        name: "total",
-        type: "histogram",
-        opacity: 0.5,
-        marker: {
-            color: "red"
-        }
-    };
-    var layout = {
-        title: {
-            text: "# salaries #",
-            font: {
-                size: 12
+    for (i = 0; i < data.length; i++) {
+        salary = data[i][keyMap[baseOrTotal]] / 100000;
+        for (j = 0; j < label.length - 1; j++) {
+            if (salary >= label[j] && salary < label[j + 1]) {
+                key = label[j]
+                if (!(key in salaries)) {
+                    salaries[key] = 1;
+                } else {
+                    salaries[key] += 1;
+                }
+                break;
             }
-        },
-        height: 400,
-        margin: {
-            t: 20,
-            l: 0,
-            r: 0
-        },
-        yaxis: {
-            automargin: true
-        },
-        xaxis: {
-            tickprefix: "₹ ",
-            ticksuffix: " lpa"
         }
-    };
-    var salaryBarChart = [trace1, trace2];
-    Plotly.newPlot("salaryBarChart", salaryBarChart, layout);
-}
-plotSalaryBarChartData();
-
-function plotTopCompaniesChartData() {
-    var companies = [];
-    var counts = [];
-    for (i = 0; i < metaInfo["top20Companies"].length; i++) {
-        companies.push(metaInfo["top20Companies"][i][0])
-        counts.push(metaInfo["top20Companies"][i][1])
     }
-    var data = [{
+    var keyValues = [];
+    for (var key in salaries) {
+        keyValues.push([key, salaries[key]])
+    }
+    keyValues.sort(function compare(kv1, kv2) {
+        return parseInt(kv1[0]) - parseInt(kv2[0])
+    })
+
+    var salariesXY = [];
+    for (var i = 0; i < keyValues.length; i++) {
+        key = keyValues[i][0];
+        salariesXY.push({
+            "x": "₹" + parseInt(key) + "-" + (parseInt(key) + stepSize) + " lpa",
+            "y": keyValues[i][1]
+        })
+    }
+    console.log(salariesXY)
+    return salariesXY;
+}
+
+function getPercentile(data, percentile) {
+    data.sort(function (a, b) {
+        return a - b;
+    });
+    var index = (percentile / 100) * data.length;
+    var result;
+    if (Math.floor(index) == index) {
+        result = (data[(index - 1)] + data[index]) / 2;
+    } else {
+        result = data[Math.floor(index)];
+    }
+    return result;
+}
+
+function getBoxPlotData(baseOrTotal, minYoe, maxYoe) {
+    var boxData = [];
+    var salaries = [];
+    for (i = 0; i < data.length; i++) {
+        if (data[i][keyMap["cleanYoe"]] >= minYoe && data[i][keyMap["cleanYoe"]] < maxYoe) {
+            if (data[i][keyMap[baseOrTotal]] != -1) {
+                salaries.push(data[i][keyMap[baseOrTotal]] / 100000);
+            }
+        }
+    }
+    boxData.push(Math.min(...salaries));
+    boxData.push(getPercentile(salaries, 25));
+    boxData.push(getPercentile(salaries, 50));
+    boxData.push(getPercentile(salaries, 75) - getPercentile(salaries, 25));
+    boxData.push(salaries.reduce((a, b) => a + b, 0) / salaries.length);
+    boxData.push(getPercentile(salaries, 75));
+    boxData.push(Math.max(...salaries));
+    return boxData;
+}
+
+function plotSalaryBarChartData(baseOrTotal) {
+    document.getElementById("salaryBarChart").innerHTML = '<canvas id="salaryBarChartJs" width="350" height="350"></canvas>';
+    const ctx = document.getElementById("salaryBarChartJs").getContext("2d");
+    if (baseOrTotal == "cleanSalary") {
+        label = "base pay";
+    } else {
+        label = "total pay";
+    }
+    new Chart(ctx, {
         type: "bar",
-        x: companies,
-        y: counts,
-        orientation: "v",
-        opacity: 0.5,
-        marker: {
-            color: "green"
-        }
-    }];
-    var layout = {
-        title: {
-            text: "# top companies (static) #",
-            font: {
-                size: 12
-            }
+        data: {
+            labels: [],
+            datasets: [{
+                label: label,
+                data: getAllBaseorTotalSalariesByCuts(baseOrTotal),
+                backgroundColor: "rgba(87,177,127,1)",
+            }]
         },
-        margin: {
-            t: 20,
-            l: 25
-        },
-        xaxis: {
-            tickfont: {
-                size: 10
-            }
-        },
-        showlegend: false
-    }
-    Plotly.newPlot("topCompaniesBarChart", data, layout);
-}
-plotTopCompaniesChartData();
-
-function plotSalaryYoeBinsChart() {
-    var yoeBin1 = [];
-    var yoeBin2 = [];
-    var yoeBin3 = [];
-    var yoeBin4 = [];
-    var yoeBin5 = [];
-    for (i = 0; i < data.length; i++) {
-        if (data[i][keyMap["cleanYoe"]] >= 0 && data[i][keyMap["cleanYoe"]] < 1) {
-            yoeBin1.push(data[i][keyMap["cleanSalary"]]);
-        } else if (data[i][keyMap["cleanYoe"]] >= 1 && data[i][keyMap["cleanYoe"]] < 3) {
-            yoeBin2.push(data[i][keyMap["cleanSalary"]]);
-        } else if (data[i][keyMap["cleanYoe"]] >= 3 && data[i][keyMap["cleanYoe"]] < 6) {
-            yoeBin3.push(data[i][keyMap["cleanSalary"]]);
-        } else if (data[i][keyMap["cleanYoe"]] >= 6 && data[i][keyMap["cleanYoe"]] < 9) {
-            yoeBin4.push(data[i][keyMap["cleanSalary"]]);
-        } else if (data[i][keyMap["cleanYoe"]] >= 9) {
-            yoeBin5.push(data[i][keyMap["cleanSalary"]]);
-        }
-    }
-    var trace1 = {
-        y: yoeBin1,
-        type: "box",
-        name: "0-1",
-        opacity: 0.5,
-        marker: {
-            color: "green"
-        }
-    };
-    var trace2 = {
-        y: yoeBin2,
-        type: "box",
-        name: "1-3",
-        opacity: 0.5,
-        marker: {
-            color: "green"
-        }
-    };
-    var trace3 = {
-        y: yoeBin3,
-        type: "box",
-        name: "3-6",
-        opacity: 0.5,
-        marker: {
-            color: "green"
-        }
-    };
-    var trace4 = {
-        y: yoeBin4,
-        type: "box",
-        name: "6-9",
-        opacity: 0.5,
-        marker: {
-            color: "green"
-        }
-    };
-    var trace5 = {
-        y: yoeBin5,
-        type: "box",
-        name: "9+",
-        opacity: 0.5,
-        marker: {
-            color: "green"
-        }
-    };
-    var layout = {
-        title: {
-            text: "# yoe bins (base) #",
-            font: {
-                size: 12
-            }
-        },
-        margin: {
-            t: 20,
-            l: 30
-        },
-        xaxis: {
-            tickfont: {
-                size: 10
-            }
-        },
-        showlegend: false
-    }
-
-    var traces = [trace1, trace2, trace3, trace4, trace5];
-    Plotly.newPlot("salaryYoeBinsChart", traces, layout);
-}
-plotSalaryYoeBinsChart();
-
-function plotSalaryTotalYoeBinsChart() {
-    var yoeBin1 = [];
-    var yoeBin2 = [];
-    var yoeBin3 = [];
-    var yoeBin4 = [];
-    var yoeBin5 = [];
-    for (i = 0; i < data.length; i++) {
-        if (data[i][keyMap["cleanSalaryTotal"]] != -1) {
-            if (data[i][keyMap["cleanYoe"]] >= 0 && data[i][keyMap["cleanYoe"]] < 1) {
-                yoeBin1.push(data[i][keyMap["cleanSalaryTotal"]]);
-            } else if (data[i][keyMap["cleanYoe"]] >= 1 && data[i][keyMap["cleanYoe"]] < 3) {
-                yoeBin2.push(data[i][keyMap["cleanSalaryTotal"]]);
-            } else if (data[i][keyMap["cleanYoe"]] >= 3 && data[i][keyMap["cleanYoe"]] < 6) {
-                yoeBin3.push(data[i][keyMap["cleanSalaryTotal"]]);
-            } else if (data[i][keyMap["cleanYoe"]] >= 6 && data[i][keyMap["cleanYoe"]] < 9) {
-                yoeBin4.push(data[i][keyMap["cleanSalaryTotal"]]);
-            } else if (data[i][keyMap["cleanYoe"]] >= 9) {
-                yoeBin5.push(data[i][keyMap["cleanSalaryTotal"]]);
+        options: {
+            scales: {
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        display: true,
+                        autoSkip: true,
+                        maxTicksLimit: 12,
+                        minRotation: 30,
+                        maxRotation: 30
+                    }
+                },
+                y: {
+                    grid: {
+                        display: false
+                    },
+                }
+            },
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    // text: "yearly pay (x) / bin counts (y)",
+                    font: {
+                        size: 9
+                    }
+                },
+                legend: {
+                    display: false
+                }
             }
         }
-    }
-    var trace1 = {
-        y: yoeBin1,
-        type: "box",
-        name: "0-1",
-        opacity: 0.5,
-        marker: {
-            color: "red"
-        }
-    };
-    var trace2 = {
-        y: yoeBin2,
-        type: "box",
-        name: "1-3",
-        opacity: 0.5,
-        marker: {
-            color: "red"
-        }
-    };
-    var trace3 = {
-        y: yoeBin3,
-        type: "box",
-        name: "3-6",
-        opacity: 0.5,
-        marker: {
-            color: "red"
-        }
-    };
-    var trace4 = {
-        y: yoeBin4,
-        type: "box",
-        name: "6-9",
-        opacity: 0.5,
-        marker: {
-            color: "red"
-        }
-    };
-    var trace5 = {
-        y: yoeBin5,
-        type: "box",
-        name: "9+",
-        opacity: 0.5,
-        marker: {
-            color: "red"
-        }
-    };
-    var layout = {
-        title: {
-            text: "# yoe bins (total) #",
-            font: {
-                size: 12
-            }
-        },
-        margin: {
-            t: 20,
-            l: 30
-        },
-        xaxis: {
-            tickfont: {
-                size: 10
-            }
-        },
-        showlegend: false
-    }
-
-    var traces = [trace1, trace2, trace3, trace4, trace5];
-    Plotly.newPlot("salaryTotalYoeBinsChart", traces, layout);
-}
-plotSalaryTotalYoeBinsChart();
-
-function getFormattedYoe(yoe) {
-    if (yoe == -1) {
-        return "<button class='btn-danger'>n/a</button>";
-    } else {
-        return yoe;
-    }
-}
-
-function getFormattedTotalSalary(totalSalary) {
-    if (totalSalary == -1) {
-        return "<button class='btn-danger'>n/a</button>";
-    } else {
-        return "₹ " + totalSalary.toLocaleString("en-IN");
-    }
-}
-
-// Add rows to the postInfo table
-function updatePostsTableContent(startIndex, endIndex) {
-    var myHtmlContent = "";
-    endIndex = Math.min(data.length, endIndex)
-    for (var i = startIndex; i < endIndex; i++) {
-        myHtmlContent += "<tr><td>" + data[i][keyMap["company"]] + "</td>";
-        myHtmlContent += "<td>" + data[i][keyMap["role"]].toLowerCase() + "</td>";
-        myHtmlContent += "<td>" + getFormattedYoe(data[i][keyMap["cleanYoe"]]) + "</td>";
-        myHtmlContent += "<td>base: ₹ " + data[i][keyMap["cleanSalary"]].toLocaleString("en-IN");
-        myHtmlContent += "<br>total: " + getFormattedTotalSalary(data[i][keyMap["cleanSalaryTotal"]]) + "</td>";
-        myHtmlContent += "<td>" + data[i][keyMap["date"]] + "</td>";
-        myHtmlContent += "<td>" + data[i][keyMap["viewCount"]] + "</td>";
-        myHtmlContent += "<td>" + data[i][keyMap["voteCount"]] + "</td>";
-        myHtmlContent += "<td><a href=https://leetcode.com/discuss/compensation/" + data[i][keyMap["id"]] + ">" +
-            data[i][keyMap["id"]] +
-            "</a></td></tr>";
-    }
-    tableTbodyRef.innerHTML = myHtmlContent;
+    })
 };
-updatePostsTableContent(0, pageSize);
+plotSalaryBarChartData("cleanSalaryTotal");
+
+function plotSalaryYoeBinsChartData(baseOrTotal) {
+    document.getElementById("salaryYoeBinsChart").innerHTML = '<canvas id="salaryYoeBinsChartJs" width="300" height="300"></canvas>';
+    const ctx = document.getElementById("salaryYoeBinsChartJs").getContext("2d");
+    if (baseOrTotal == "cleanSalary") {
+        label = "base pay";
+    } else {
+        label = "total pay";
+    }
+    var myChart = new Chart(ctx, {
+        type: "boxplot",
+        data: {
+            labels: ["0-1", "1-3", "3-6", "6-9", "9+"],
+            datasets: [{
+                label: label,
+                data: [getBoxPlotData(baseOrTotal, 0, 1), getBoxPlotData(baseOrTotal, 1, 3),
+                    getBoxPlotData(baseOrTotal, 3, 6), getBoxPlotData(baseOrTotal, 6, 9),
+                    getBoxPlotData(baseOrTotal, 9, 30)
+                ],
+                backgroundColor: "rgba(87,177,127,1)",
+            }]
+        },
+        options: {
+            scales: {
+                yAxis: {
+                    display: true,
+                    ticks: {
+                        callback: function(value, index, values) {
+                            return "₹" + value + " lpa";
+                        }
+                    },
+                    grid: {
+                        display: false
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        minRotation: 30,
+                        maxRotation: 30
+                    }
+                },
+            },
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    // text: "yoe bins (x) / yearly pay in ₹ lpa (y)",
+                    font: {
+                        size: 9
+                    }
+                },
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    bodyFont: {
+                        size: 8
+                    }
+                }
+            }
+        }
+    })
+};
+plotSalaryYoeBinsChartData("cleanSalaryTotal");
+
+function getCountByMonth() {
+    var countByMonth = {};
+    for (i = 0; i < data.length; i++) {
+        key = data[i][keyMap["date"]].substr(2, 5);
+        if (!(key in countByMonth)) {
+            countByMonth[key] = 1;
+        } else {
+            countByMonth[key] += 1;
+        }
+    }
+    var sortedCountByMonth = {};
+    var keys = Object.keys(countByMonth);
+    keys.sort();
+    for (var i = 0; i < keys.length; i++) {
+        sortedCountByMonth[keys[i]] = countByMonth[keys[i]];
+    }
+    return sortedCountByMonth;
+}
+
+function plotCountsByMonthChart() {
+    document.getElementById("countsByMonthChart").innerHTML = '<canvas id="countsByMonthChartJs" width="300" height="300"></canvas>';
+    const ctx = document.getElementById("countsByMonthChartJs").getContext("2d");
+    counts = getCountByMonth();
+    new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: Object.keys(counts),
+            datasets: [{
+                label: "",
+                data: Object.values(counts),
+                backgroundColor: "rgba(87,177,127,1)",
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        display: true,
+                        autoSkip: true,
+                        maxTicksLimit: 9,
+                        minRotation: 30,
+                        maxRotation: 30
+                    }
+                },
+                y: {
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    // text: "yearly pay (x) / bin counts (y)",
+                    font: {
+                        size: 9
+                    }
+                },
+                legend: {
+                    display: false
+                }
+            }
+        }
+    })
+};
+plotCountsByMonthChart();
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////// Buttons
+function resetData() {
+    plotSalaryBarChartData(getActiveBaseOrTotalPay());
+    plotSalaryYoeBinsChartData(getActiveBaseOrTotalPay());
+    plotCountsByMonthChart();
+    updatePageCount();
+    updatePostsTableContent(0, pageSize);
+    resetNavPageNo();
+    updateNRows();
+}
+
+// Toggle to Total Pay
+function makeTotalPayButton() {
+    eBase = document.getElementById("basePayButton");
+    eTotal = document.getElementById("totalPayButton");
+    eBase.classList.remove("active");
+    eTotal.classList.add("active");
+
+    _SearchYoeFilter();
+}
+
+// Toggle to Base Pay
+function makeBasePayButton() {
+    eBase = document.getElementById("basePayButton");
+    eTotal = document.getElementById("totalPayButton");
+    eTotal.classList.remove("active");
+    eBase.classList.add("active");
+
+    _SearchYoeFilter();
+}
+
+// Toggle to Intern
+function makeInternButton() {
+    eInternship = document.getElementById("internshipButton");
+    eFullTime = document.getElementById("fullTimeButton");
+    eFullTime.classList.remove("active");
+    eInternship.classList.add("active");
+
+    setFullTimeOrInternship("monthly");
+    _SearchYoeFilter();
+}
+
+// Toggle to Full time
+function makeFullTimeButton() {
+    eInternship = document.getElementById("internshipButton");
+    eFullTime = document.getElementById("fullTimeButton");
+    eInternship.classList.remove("active");
+    eFullTime.classList.add("active");
+
+    setFullTimeOrInternship("yearly");
+    _SearchYoeFilter();
+}
 
 // Nav pagniation filter
 function filterNavData(e) {
@@ -391,49 +413,70 @@ function resetNavPageNo() {
 }
 
 function updateNRows() {
-    document.getElementById("nRows").innerHTML = "# rows: " + data.length
+    document.getElementById("nRows").innerHTML = data.length + " rows"
 }
 updateNRows();
 
-function resetData() {
-    plotSalaryBarChartData();
-    plotSalaryYoeBinsChart();
-    plotSalaryTotalYoeBinsChart();
-    updatePageCount();
-    updatePostsTableContent(0, pageSize);
-    resetNavPageNo();
-    updateNRows();
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////// Table
+function getActiveBaseOrTotalPay() {
+    if (document.getElementById("basePayButton").classList.contains("active")) {
+        return "cleanSalary";
+    } else {
+        return "cleanSalaryTotal";
+    }
 }
 
-// Toggle to Intern
-function makeInternButton() {
-    eInternship = document.getElementById("internshipButton");
-    eFullTime = document.getElementById("fullTimeButton");
-    eFullTime.classList.remove("active");
-    eInternship.classList.add("active");
-
-    setFullTimeOrInternship("monthly");
-    _SearchYoeFilter();
-    resetData();
+function getFormattedYoe(yoe) {
+    if (yoe == -1) {
+        return '<button class="btn-danger">n/a</button>';
+    } else {
+        return yoe;
+    }
 }
 
-// Toggle to Full time
-function makeFullTimeButton() {
-    eInternship = document.getElementById("internshipButton");
-    eFullTime = document.getElementById("fullTimeButton");
-    eInternship.classList.remove("active");
-    eFullTime.classList.add("active");
-
-    setFullTimeOrInternship("yearly");
-    _SearchYoeFilter();
-    resetData();
+function getFormattedTotalSalary(totalSalary) {
+    if (totalSalary == -1) {
+        return '<button class="btn-danger">n/a</button>';
+    } else {
+        return "₹ " + totalSalary.toLocaleString("en-IN");
+    }
 }
 
+// Add rows to the postInfo table
+function updatePostsTableContent(startIndex, endIndex) {
+    var myHtmlContent = "";
+    endIndex = Math.min(data.length, endIndex)
+    for (var i = startIndex; i < endIndex; i++) {
+        myHtmlContent += "<tr><td><span class='primaryText'>" + data[i][keyMap["company"]] + "</span><p class='secondaryText'>" + 
+            data[i][keyMap["role"]] + "</p></td>";
+        myHtmlContent += "<td>" + getFormattedYoe(data[i][keyMap["cleanYoe"]]) + "</td>";
+        myHtmlContent += "<td>total: " + getFormattedTotalSalary(data[i][keyMap["cleanSalaryTotal"]]);
+        myHtmlContent += "<p class='secondaryText'>base: ₹ " + data[i][keyMap["cleanSalary"]].toLocaleString("en-IN") + "</p></td>";
+        myHtmlContent += "<td>" + data[i][keyMap["date"]] + "</td>";
+        myHtmlContent += "<td>" + data[i][keyMap["voteCount"]] + "<p class='secondaryText'>(" +
+            data[i][keyMap["viewCount"]] + ")</p></td>";
+        myHtmlContent += "<td><a class='postHref' href=https://leetcode.com/discuss/compensation/" + data[i][keyMap["id"]] + ">" +
+            data[i][keyMap["id"]] + "</a></td></tr>";
+    }
+    tableTbodyRef.innerHTML = myHtmlContent;
+};
+updatePostsTableContent(0, pageSize);
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////// Static content
 // Most offers
 document.getElementById("mostOffers").innerHTML = ""
-for (i = 0; i < metaInfo["mostOffersInLastMonth"].length; i++) {
+for (i = 0; i < Math.min(metaInfo["top20Companies"].length, 8); i++) {
+    cc = metaInfo["top20Companies"][i]
+    document.getElementById("mostOffers").innerHTML += '<div class="col">' +
+        cc[0] + "(" + cc[1] + ")" + "</div>"
+}
+
+document.getElementById("mostOffers30").innerHTML = ""
+for (i = 0; i < Math.min(metaInfo["mostOffersInLastMonth"].length, 8); i++) {
     cc = metaInfo["mostOffersInLastMonth"][i]
-    document.getElementById("mostOffers").innerHTML += "<div class='col'>" +
+    document.getElementById("mostOffers30").innerHTML += '<div class="col">' +
         cc[0] + "(" + cc[1] + ")" + "</div>"
 }
 
@@ -444,6 +487,8 @@ document.getElementById("stats").innerHTML = "Total Posts: " + metaInfo["totalPo
     " | Last updated: " + metaInfo["lastUpdated"]
 
 
+
+//////////////////////////////////////////////////////////////////////////////////// Sort and (Search + Min-Max) Filters
 // Sorting by salary
 var sortedAsc = false;
 
@@ -485,7 +530,6 @@ function sortBySalary(e) {
     }
     resetData();
 }
-
 
 // Search and Min-Max yoe
 function debounce(func, timeout = 300) {
@@ -550,7 +594,20 @@ function _SearchYoeFilter() {
     if (document.getElementById("search").value.length > 2) {
         search(document.getElementById("search"));
     } else {
-        window.data = allData;
+        if (document.getElementById("fullTimeButton").classList.contains("active")) {
+            for (i = 0; i < allData.length; i++) {
+                if (allData[i][keyMap["yrOrPm"]] == "yearly") {
+                    window.data.push(allData[i]);
+
+                }
+            }
+        } else if (document.getElementById("internshipButton").classList.contains("active")) {
+            for (i = 0; i < allData.length; i++) {
+                if (allData[i][keyMap["yrOrPm"]] == "monthly") {
+                    window.data.push(allData[i]);
+                }
+            }
+        }
     }
     tempData = [];
     for (i = 0; i < window.data.length; i++) {

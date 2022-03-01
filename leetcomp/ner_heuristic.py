@@ -21,14 +21,14 @@ INTERN_SALARY_RANGE_INDIA = (10_000, 2_00_000)
 
 # fmt: off
 LABEL_SPECIFICATION = {
-    "RE_COMPANY": re.compile(r"\*?\*?company\s?\*?\*?[:-]-?\s?\*?\*?(?P<label>[&\w\.\-\(\)\,\/\` ]+)"),
-    "RE_ROLE": re.compile(r"title\s?(/level)?\s?[:-]-?\s?(?P<label>[&\w\.\-\/\+\#\,\(\)\` ]+)"),
+    "RE_COMPANY": re.compile(r"\*?\*?company\s?(\d\s?)?\*?\*?[:-]-?\s?\*?\*?(?P<label>[&\w\.\-\(\)\,\/\` ]+)"),
+    "RE_ROLE": re.compile(r"(title|role)\s?(/level)?\s?[:-]-?\s?(?P<label>[&\w\.\-\/\+\#\,\(\)\` ]+)"),
     "RE_YOE": re.compile(r"((yrs|years\sof\s)(experience|exp)|yoe|(\\n|\btotal\s)experience)\s?[:-]-?\s?(?P<label>[\w\.\+\~\-\,\/\` ]+)"),
     "RE_YOE_CLEAN": re.compile(r"(\d{1,2}(\.\d{1,2})?)\s?(yrs|years?)?(\s?(\d{1,2})\s?(months))?"),
     "RE_YOE_CLEAN_MONTHS": re.compile(r"^(\d{1,2})\s?months?$"),
     "RE_SALARY": re.compile(r"(salary|base|base pay)\s?[:-]-?\s?(?P<label>[\w\,\₹\$\.\/\-\(\)\`\\u20b9&#8377;\~ ]+)"),
     "RE_LOCATION": re.compile(r"location\s?[:-]-?\s?(?P<label>[\w\,\` ]+)"),
-    "RE_SALARY_TOTAL": re.compile(r"\\n[\s\-\\t\.]{0,3}?tot?al (1st year\s)?(comp[e|a]nsation|comp|ctc)(\sfor 1st year)?(\s?\(\s?(salary|base).+?\))?(?P<label>.+)"),
+    "RE_SALARY_TOTAL": re.compile(r"\\n[\s\-\\t\.]{0,3}?tot?al ((1st year|yearly)\s)?(comp[e|a]nsation|comp|ctc)(\sfor 1st year)?(\s?\(\s?(salary|base).+?\))?(?P<label>.+?)\\n"),
     "RE_SALARY_CLEAN_LPA": re.compile(r"(\d{1,3}(\.\d{1,2})?)\s?(lpa|lakh|lac|l|cr)"),
 }
 # fmt: on
@@ -56,8 +56,14 @@ def _preprocess_text(content: str) -> str:
     return content
 
 
+def _filter_content(content: str) -> str:
+    splits = content.split("\\n")
+    return "\\n".join([txt for txt in splits if not txt.split(" ")[0] in {"current", "previous"}])
+
+
 def _find_matches(regex_pattern: Pattern[str], content: str) -> List[str]:
     matches = []
+    content = _filter_content(content)
     for match in re.finditer(regex_pattern, content):
         matched_text = match.group("label").strip()
         formatted_text = " ".join([txt.capitalize() for txt in matched_text.split(" ")])
@@ -66,15 +72,20 @@ def _find_matches(regex_pattern: Pattern[str], content: str) -> List[str]:
 
 
 def _get_info_as_flat_list(info: Dict[str, Union[List[str], Dict[str, Any]]]) -> List[Dict[str, Any]]:
-    n_info = min([len(info["companies"]), len(info["roles"]), len(info["yoes"]), len(info["salaries"])])
+    n_info = min([len(info["companies"]), len(info["roles"]), len(info["salaries"])])
+    if len(info["yoes"]) < n_info:
+        info["yoes"] += [info["yoes"][-1] for _ in range(n_info - len(info["yoes"]))]  # type: ignore
     expanded_info = []
-    for _ in range(n_info):
+    for i in range(n_info):
         flat_info: Dict[str, Any] = info["info"].copy()  # type: ignore
-        flat_info["company"] = info["companies"][0]  # type: ignore
-        flat_info["role"] = info["roles"][0]  # type: ignore
-        flat_info["yoe"] = info["yoes"][0]  # type: ignore
-        flat_info["salary"] = info["salaries"][0]  # type: ignore
-        flat_info["salaryTotal"] = info["total_salaries"][0] if info["total_salaries"] else ""  # type: ignore
+        flat_info["company"] = info["companies"][i]  # type: ignore
+        flat_info["role"] = info["roles"][i]  # type: ignore
+        flat_info["yoe"] = info["yoes"][i]  # type: ignore
+        flat_info["salary"] = info["salaries"][i]  # type: ignore
+        if i < len(info["total_salaries"]):
+            flat_info["salaryTotal"] = info["total_salaries"][i]  # type: ignore
+        else:
+            flat_info["salaryTotal"] = ""
         expanded_info.append(flat_info)
     return expanded_info
 
@@ -115,7 +126,14 @@ def _get_standardized_yoe(yoe: str, clean_title: str, role: str) -> float:
     for m in re.finditer(LABEL_SPECIFICATION["RE_YOE_CLEAN_MONTHS"], yoe):
         return round(float(m.groups()[0]) / 12, 1)
     if not yoe:
-        if "intern" in clean_title or "intern" in role:
+        if (
+            "intern" in clean_title
+            or "intern" in role
+            or "intern" in yoe
+            or "fresher" in clean_title
+            or "fresher" in role
+            or "fresher" in yoe
+        ):
             return 0.0
     for m in re.finditer(LABEL_SPECIFICATION["RE_YOE_CLEAN"], yoe):
         groups = m.groups()
@@ -239,15 +257,7 @@ def _add_clean_companies(raw_info: List[Dict[str, Any]]) -> None:
 def _drop_info(raw_info: List[Dict[str, Any]]) -> None:
     for r in raw_info:
         try:
-            del (
-                r["title"],
-                r["yoe"],
-                r["salary"],
-                r["salaryTotal"],
-                r["city"],
-                r["country"],
-                r["content"],
-            )
+            del (r["title"], r["yoe"], r["salary"], r["salaryTotal"], r["city"], r["country"], r["content"])
         except KeyError:
             continue
 
@@ -290,6 +300,10 @@ def _update_data_in_js(raw_info: List[Dict[str, Any]], meta_info: Dict[str, Any]
         f.write(f"var allData = {json.dumps([list(r.values()) for r in raw_info])};")
 
 
+def _till_first_newline(txt: str) -> str:
+    return txt.split("\\n")[0]
+
+
 def _find_companies_roles_yoes_salaries(
     clean_content,
 ) -> Tuple[List[str], List[str], List[str], List[str], List[str]]:
@@ -297,7 +311,9 @@ def _find_companies_roles_yoes_salaries(
     roles = _find_matches(LABEL_SPECIFICATION["RE_ROLE"], clean_content)
     yoes = _find_matches(LABEL_SPECIFICATION["RE_YOE"], clean_content)
     salaries = _find_matches(LABEL_SPECIFICATION["RE_SALARY"], clean_content)
+    salaries = [_till_first_newline(salary) for salary in salaries]
     total_salaries = _find_matches(LABEL_SPECIFICATION["RE_SALARY_TOTAL"], clean_content)
+    total_salaries = [_till_first_newline(total_salary) for total_salary in total_salaries]
     return companies, roles, yoes, salaries, total_salaries
 
 
@@ -315,7 +331,6 @@ def _post_process_report_and_save_data(
     logger.info(f"N posts dropped (missing data): {n_dropped}")
     _report(raw_info)
     raw_info = _filter_invalid_salaries(raw_info)
-
     _add_clean_companies(raw_info)
     raw_info = sorted(raw_info, key=lambda x: x["date"], reverse=True)
     meta_info = _save_meta_info(total_posts, raw_info)
@@ -333,12 +348,13 @@ def parse_posts_and_save_tagged_info(new_post_ids: List[str]) -> None:
             total_posts += 1
             info = {"id": r.id, "title": r.title, "voteCount": r.voteCount, "viewCount": r.viewCount,
                     "date": datetime.fromtimestamp(int(r.creationDate)).strftime("%Y-%m-%d"), "content": r.content}
-            clean_content = _preprocess_text(r.content)
+            clean_content = _preprocess_text(r.content) + "\\n"
             content[r.id] = clean_content
             companies, roles, yoes, salaries, total_salaries = _find_companies_roles_yoes_salaries(clean_content)
-            if companies and roles and yoes and salaries:
+
+            if companies and roles and salaries:
                 expanded_info = _get_info_as_flat_list({
-                    "companies": companies, "roles": roles, "yoes": yoes,
+                    "companies": companies, "roles": roles, "yoes": yoes if yoes else [""],
                     "salaries": salaries, "total_salaries": total_salaries, "info": info
                 })
                 _add_clean_location(expanded_info, _preprocess_text(r.title), clean_content)

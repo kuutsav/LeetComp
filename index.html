@@ -13,40 +13,62 @@
 
 <body>
     <div class="container">
-        <h1 id="leetComp" class="col">💸 LeetComp 💸</h1>
+        <!-- Top Banner -->
+        <h2 id="leetComp" class="col">LeetComp: Leetcode compensations</h2>
         <div style="text-align: center;">
             <a href="https://github.com/kuutsav/LeetComp/stargazers">
                 <img alt="star this repo" src="https://img.shields.io/github/stars/kuutsav/LeetComp?style=social">
             </a>
         </div>
         <br>
-        <div class="alert alert-primary" role="alert">
-            <div style="text-align: center; font-size: small;">
+        <div class="alert alert-primary" id="headBanner" role="alert">
+            <div style="font-size: small;">
                 LeetComp works by regularly fetching and parsing new posts from the leetcode
-                compensations page (only supports posts from <b>India</b> at the moment)
+                compensations page (only supports posts from <b>India</b> at the moment).<br>
+                <span style="font-size: smaller;">(<strong>Chart 1</strong> shows salary distribution; x axis has the
+                    salary ranges and y axis has the counts for that range. <strong>Chart 2</strong> shows salary
+                    distribution by yoe bins; x axis has the yoe bins and y axis has the annual salary in ₹LPA.
+                    <strong>Chart 3</strong> shows number of offers by month;
+                    x axis has the month and y axis has the offer counts.)
+                </span>
             </div>
         </div>
+        <!-- Total - Base pay toggle -->
+        <div class="btn-group btn-group-toggle">
+            <label class="btn btn-secondary active" onclick="makeTotalPayButton()" id="totalPayButton">Total Pay</label>
+            <label class="btn btn-secondary" onclick="makeBasePayButton()" id="basePayButton">Base Pay</label>
+        </div>
+        <!-- Charts -->
         <div class="row">
-            <div id="salaryBarChart">
+            <div id="salaryBarChart" style="height: 300px;" class="col-12">
+                <canvas id="salaryBarChartJs" width="300" height="300"></canvas>
                 <!-- Salary bar chart -->
             </div>
         </div>
         <div class="row">
-            <div id="salaryYoeBinsChart" class="col-4">
-                <!-- Yoe salary bins box plots -->
+            <div id="salaryYoeBinsChart" style="height:264px;" class="col-4">
+                <canvas id="salaryYoeBinsChartJs" width="270" height="270"></canvas>
+                <!-- Salary Yoe bins chart -->
             </div>
-            <div id="salaryTotalYoeBinsChart" class="col-4">
-                <!-- Yoe salary(total) bins box plots -->
-            </div>
-            <div id="topCompaniesBarChart" class="col-4">
-                <!-- Top companies bar chart -->
+            <div id="countsByMonthChart" style="height: 270px;" class="col-8">
+                <canvas id="countsByMonthChartJs" width="270" height="270"></canvas>
+                <!-- Salary Yoe bins chart -->
             </div>
         </div>
-        <div id="mostOffersTitle">📈 Most offers in the last 30 days (static list)</div>
+        <br>
+        <!-- Static content -->
+        <div id="mostOffersTitle"><b>📈 Most offers so far (static list)</b></div>
         <hr>
         <div class="row" id="mostOffers"></div>
         <hr>
+        <div id="mostOffers30Title"><b>📈 Most offers in the last 30 days (static list)</b></div>
+        <hr>
+        <div class="row" id="mostOffers30"></div>
+        <hr>
+        <br>
+        <!-- Data Table controls -->
         <div class="row">
+            <!-- Full Time - Internship toggle -->
             <div class="col-auto mr-auto">
                 <div class="btn-group btn-group-toggle">
                     <label class="btn btn-secondary active" onclick="makeFullTimeButton()" id="fullTimeButton">Full
@@ -55,75 +77,83 @@
                         id="internshipButton">Internship</label>
                 </div>
             </div>
+            <!-- Search -->
             <div class="col-auto mr-auto">
                 <input type="search" class="form-control-sm rounded" placeholder="Search" aria-label="Search"
                     aria-describedby="search-addon" id="search" onkeyup="SearchYoeFilter()" />
             </div>
+            <!-- Min - Max Yoe filter -->
             <div class="col-auto mr-auto">
-                <input type="search" class="form-control-sm rounded" placeholder="min yoe" aria-label="minYoe"
-                    aria-describedby="min-yoe" id="minYoe" onkeyup="SearchYoeFilter()" />
-                <input type="search" class="form-control-sm rounded" placeholder="max yoe" aria-label="maxYoe"
-                    aria-describedby="max-yoe" id="maxYoe" onkeyup="SearchYoeFilter()" />
+                <input type="search" class="form-control-sm rounded" placeholder="#" aria-label="minYoe"
+                    aria-describedby="min-yoe" id="minYoe" onkeyup="SearchYoeFilter()" /> to
+                <input type="search" class="form-control-sm rounded" placeholder="#" aria-label="maxYoe"
+                    aria-describedby="max-yoe" id="maxYoe" onkeyup="SearchYoeFilter()" /> YOE
             </div>
-            <div class="col-auto mr-auto text-muted" id="nRows"></div>
-            <nav aria-label="Page navigation example" class="col-auto ms-auto">
-                <ul class="pagination">
-                    <li class="page-item">
-                        <a class="page-link" href="#" aria-label="Previous" onclick="decrementNavPageNo()">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
-                    </li>
-                    <li class="page-item"><a class="page-link" href="#" onclick="filterNavData(this)"
-                            id="navPageNo1">1</a>
-                    </li>
-                    <li class="page-item"><a class="page-link" href="#" onclick="filterNavData(this)"
-                            id="navPageNo2">2</a>
-                    </li>
-                    <li class="page-item"><a class="page-link" href="#" onclick="filterNavData(this)"
-                            id="navPageNo3">3</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="#" aria-label="Next" onclick="incrementNavPageNo()">
-                            <span aria-hidden="true">&raquo;</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
         </div>
+        <br>
+        <!-- Data Table -->
         <table id="postInfo" class="table table-hover">
             <thead>
                 <tr>
-                    <th scope="col" style="width:23%">Company</th>
-                    <th scope="col" style="width:23%">Role</th>
-                    <th scope="col" style="width:10%">Yoe <span class="sortButton" onclick="sortBySalary(this)"
-                            id="cleanYoe">▾</span></th>
-                    <th scope="col" style="width:14%">Salary <span class="sortButton" onclick="sortBySalary(this)"
-                            id="cleanSalary">▾</span> <span class="sortButton" onclick="sortBySalary(this)"
-                            id="cleanSalaryTotal">▾</span></th>
-                    <th scope="col" style="width:10%">Date <span class="sortButton" onclick="sortBySalary(this)"
-                            id="date">▾</span></th>
-                    <th scope="col" style="width:8%">Views <span class="sortButton" onclick="sortBySalary(this)"
-                            id="viewCount">▾</span></th>
-                    <th scope="col" style="width:8%">Votes <span class="sortButton" onclick="sortBySalary(this)"
-                            id="voteCount">▾</span></th>
-                    <th scope="col" style="width:4%">PostId</th>
+                    <th scope="col" style="width:35%">Company (<span id="nRows"></span>)
+                        <p class="secondaryText secondaryTheadText">Role</p>
+                    </th>
+                    </th>
+                    <th scope="col" style="width:13%">Yoe<span class="sortButton" onclick="sortBySalary(this)"
+                            id="cleanYoe">&nbsp;▾</span></th>
+                    <th scope="col" style="width:22%">Salary<span class="sortButton" onclick="sortBySalary(this)"
+                            id="cleanSalaryTotal">&nbsp;▾</span><span class="sortButton" onclick="sortBySalary(this)"
+                            id="cleanSalary">&nbsp;▾</span></th>
+                    <th scope="col" style="width:15%">Date<span class="sortButton" onclick="sortBySalary(this)"
+                            id="date">&nbsp;▾</span></th>
+                    <th scope="col" style="width:10%">Votes<span class="sortButton" onclick="sortBySalary(this)"
+                            id="voteCount">&nbsp;▾</span>
+                        <p class="secondaryText secondaryTheadText">Views</p>
+                    </th>
+                    <th scope="col" style="width:5%">PostId</th>
                 </tr>
             </thead>
             <tbody>
                 <tr></tr>
             </tbody>
         </table>
+        <!-- Pagination -->
+        <nav>
+            <ul class="pagination">
+                <li class="page-item">
+                    <a class="page-link" aria-label="Previous" onclick="decrementNavPageNo()">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item"><a class="page-link" onclick="filterNavData(this)" id="navPageNo1">1</a>
+                </li>
+                <li class="page-item"><a class="page-link" onclick="filterNavData(this)" id="navPageNo2">2</a>
+                </li>
+                <li class="page-item"><a class="page-link" onclick="filterNavData(this)" id="navPageNo3">3</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" aria-label="Next" onclick="incrementNavPageNo()">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
         <div id="stats"></div>
+        <div style="text-align: center;">Inspired by
+            <a href="https://www.levels.fyi/Salaries/Software-Engineer/India/">levels.fyi</a> and
+            <a href="http://csrankings.org/">csrankings.org</a>
+        </div>
         <hr>
         <script src="https://utteranc.es/client.js" repo="kuutsav/LeetComp" issue-term="pathname" label="comments"
             theme="github-light" crossorigin="anonymous" async></script>
     </div>
 
-    <script src="js/data.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.plot.ly/plotly-2.8.3.min.js"></script>
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous">
+    </script>
+    <script src="js/data.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/@sgratzl/chartjs-chart-boxplot@3.6.0/build/index.umd.min.js"></script>
     <script src="js/scripts.js"></script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-G5Y6PERW9N"></script>
     <script>
