@@ -1,34 +1,34 @@
----
-name: Staging Auto-PR
+# ---
+# name: Staging Auto-PR
 
-on:
-  schedule:
-    - cron: "*/1 * * * *"
+# on:
+#   schedule:
+#     - cron: "*/1 * * * *"
 
-jobs:
-  pull-request:
-    name: Open PR to main with updated data
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-      name: checkout
+# jobs:
+#   pull-request:
+#     name: Open PR to main with updated data
+#     runs-on: ubuntu-latest
+#     steps:
+#     - uses: actions/checkout@v2
+#       name: checkout
 
-    - uses: repo-sync/pull-request@v2
-      name: pull-request
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        BRANCH_PREFIX: "update/"
-        PULL_REQUEST_BRANCH: "develop"
+#     - uses: repo-sync/pull-request@v2
+#       name: pull-request
+#       env:
+#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#         BRANCH_PREFIX: "update/"
+#         PULL_REQUEST_BRANCH: "develop"
 
-      with:
-        destination_branch: "main"
-        pr_title: "[Data Refresh] Pulling ${{ github.ref }} into main"
-        pr_body: "*An automated PR*"
-        pr_reviewer: "kuutsav"
-        pr_draft: true
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        labels: automated pr
+#       with:
+#         destination_branch: "main"
+#         pr_title: "[Data Refresh] Pulling ${{ github.ref }} into main"
+#         pr_body: "*An automated PR*"
+#         pr_reviewer: "kuutsav"
+#         pr_draft: true
+#         github_token: ${{ secrets.GITHUB_TOKEN }}
+#         labels: automated pr
     
-    - name: execute py script # run the update.py to get the latest data
-      run: |
-        python update.py
+#     - name: execute py script # run the update.py to get the latest data
+#       run: |
+#         python update.py
