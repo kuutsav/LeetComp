@@ -2,10 +2,8 @@
 name: Staging Auto-PR
 
 on:
-  push:
-    branches: ["develop"]
   schedule:
-        - cron: "15 23 * * *" # runs at 00:00 UTC everyday
+    - cron: "03 24 * * *" # runs at 00:00 UTC everyday
 
 jobs:
   pull-request:
@@ -17,6 +15,11 @@ jobs:
 
     - uses: repo-sync/pull-request@v2
       name: pull-request
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        BRANCH_PREFIX: "update/"
+        PULL_REQUEST_BRANCH: "develop"
+
       with:
         destination_branch: "main"
         pr_title: "[Data Refresh] Pulling ${{ github.ref }} into main"
@@ -24,6 +27,7 @@ jobs:
         pr_reviewer: "kuutsav"
         pr_draft: true
         github_token: ${{ secrets.GITHUB_TOKEN }}
+        labels: automated pr
     
     - name: execute py script # run the update.py to get the latest data
       run: |
