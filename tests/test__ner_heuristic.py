@@ -19,7 +19,6 @@ def test_parse_posts_and_save_tagged_info(
         assert metadata["totalPostsFromIndia"] == 20
         assert metadata["totalPostsWithTotalComp"] == 0
         assert metadata["top20Companies"] == [["Swiggy Title", 20]]
-        assert metadata["mostOffersInLastMonth"] == [["Swiggy Title", 20]]
 
     # validate posts info
     with open(f"{TESTS_DATA_DIR}/posts_info.json", "r") as f:
