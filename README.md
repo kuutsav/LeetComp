@@ -5,7 +5,7 @@
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 
 
-Analysing compensations mentioned on the Leetcode forums (https://kuutsav.github.io/LeetComp).
+Analysing compensations mentioned on the Leetcode forums.
 
 > Note: Only supports posts from `India` at the moment.
 
@@ -39,10 +39,10 @@ $ poetry shell
 $ export PYTHONPATH=.
 $ python update.py
 
-----------------------------Fetching posts meta info----------------------------
+-----------Fetching posts meta info-----------
 Found 6835 posts(456 pages)
 73 posts synced, skipping the rest ...
---------------------------Updating posts with content---------------------------
+---------Updating posts with content----------
 Found 73 post ids without content, syncing ...
 PostID 1786560;   0/73 posts done
 PostID 1783572;  10/73 posts done
@@ -53,7 +53,7 @@ PostID 1777850;  50/73 posts done
 PostID 1776532;  60/73 posts done
 PostID 1775146;  70/73 posts done
 All posts synced
----------------------------------Parsing posts----------------------------------
+----------------Parsing posts----------------
 Total posts: 6905
 N posts dropped (missing data): 1448
 Posts with all the info: 5468
@@ -62,7 +62,7 @@ Posts with YOE: 5385
 Posts from India: 3923
 Posts with Total Comp: 2257
 Dropped 181/3923 records due to invalid pay
-----------------------------Building inverted index-----------------------------
+-----------Building inverted index------------
 Keeping 1303/1303 tokens
 ```
 
