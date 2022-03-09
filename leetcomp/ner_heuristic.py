@@ -119,9 +119,7 @@ def _get_standardized_location(title: str, content: str) -> Tuple[str, str]:
 
 
 def _get_standardized_yoe(yoe: str, clean_title: str, role: str) -> float:
-    if set(yoe.split(" ")).intersection({"fresher", "fresh", "new grad", "n/a", "none", "nil"}):
-        return 0.0
-    if "grad" in yoe:
+    if set(yoe.split(" ")).intersection({"fresher", "fresh", "grad", "n/a", "none", "nil", "intern", "internship"}):
         return 0.0
     for m in re.finditer(LABEL_SPECIFICATION["RE_YOE_CLEAN_MONTHS"], yoe):
         return round(float(m.groups()[0]) / 12, 1)
