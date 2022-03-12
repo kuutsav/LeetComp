@@ -5,8 +5,8 @@ on:
     - cron:  '0 0 */2 * *'
 
 jobs:
-  tests:
-    name: "Python ${{ matrix.python-version }}"
+  automatic-data-update:
+    name: "Automatic Data Update"
     runs-on: "ubuntu-latest"
 
     strategy:
