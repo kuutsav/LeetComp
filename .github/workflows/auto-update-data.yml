@@ -28,7 +28,7 @@ jobs:
       - name: "Run Script to Fetch Data"
         run: |
           export PYTHONPATH=.
-          poetry run python -m update.py
+          python update.py
 
       - name: "Commit & Push the data"
         run: |
