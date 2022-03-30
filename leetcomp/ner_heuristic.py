@@ -25,7 +25,7 @@ LABEL_SPECIFICATION = {
     "RE_ROLE": re.compile(r"(title|role)\s?(/level)?\s?[:-]-?\s?(?P<label>[&\w\.\-\/\+\#\,\(\)\` ]+)"),
     "RE_YOE": re.compile(r"((yrs|years\sof\s)(experience|exp)|yoe|(\\n|\btotal\s)experience)\s?[:-]-?\s?(?P<label>[\w\.\+\~\-\,\/\` ]+)"),
     "RE_YOE_CLEAN": re.compile(r"(\d{1,2}(\.\d{1,2})?)\s?(yrs|years?)?(\s?(\d{1,2})\s?(months))?"),
-    "RE_YOE_CLEAN_MONTHS": re.compile(r"^(\d{1,2})\s?months?$"),
+    "RE_YOE_CLEAN_MONTHS": re.compile(r"^(\d{1,2})\s?months?"),
     "RE_SALARY": re.compile(r"(salary|base|base pay)\s?[:-]-?\s?(?P<label>[\w\,\₹\$\.\/\-\(\)\`\\u20b9&#8377;\~ ]+)"),
     "RE_LOCATION": re.compile(r"location\s?[:-]-?\s?(?P<label>[\w\,\` ]+)"),
     "RE_SALARY_TOTAL": re.compile(r"\\n[\s\-\\t\.]{0,3}?tot?al ((1st year|yearly)\s)?(comp[e|a]nsation|comp|ctc)(\sfor 1st year)?(\s?\(\s?(salary|base).+?\))?(?P<label>.+?)\\n"),
