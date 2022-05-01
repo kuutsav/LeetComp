@@ -6,7 +6,7 @@ authors = ["kuutsav <kumar.utsav@freshworks.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-SQLAlchemy = "^1.4.31"
+SQLAlchemy = "^1.4.36"
 requests = "^2.27.1"
 loguru = "^0.6.0"
 pre-commit = "^2.17.0"
