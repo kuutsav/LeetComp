@@ -15,7 +15,7 @@ from leetcomp.utils import get_today, session_scope
 
 CACHE_DIR = ".cache"
 LEETCODE_GRAPHQL_URL = "https://leetcode.com/graphql"
-SLEEP_FOR_ATLEAST = 1  # seconds
+SLEEP_FOR_ATLEAST = 0.2  # seconds
 
 
 # cache dir; removes the data cached before today
