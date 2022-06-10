@@ -168,7 +168,7 @@ def get_posts_meta_info() -> List[str]:
             break
         n_new_posts = _update_post_ids_and_new_post_counts(n_new_posts, old_post_ids, new_data)
         if page_no % 10 == 0:
-            logger.info(f"{page_no:>3}/{n_pages+1} pages done; {page_no*100/n_pages:.2f}%; slept_for={sleep_for}")
+            logger.info(f"{page_no:>3}/{n_pages+1} pages done; {page_no*100/n_pages:.2f}%; slept_for={sleep_for:.2f}s")
     return all_new_post_ids
 
 

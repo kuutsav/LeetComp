@@ -1,4 +1,3 @@
-from distutils.command.build import build
 from loguru import logger
 
 from leetcomp.inverted_index import build_inverted_index
