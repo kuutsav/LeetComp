@@ -1,6 +1,5 @@
 from collections import Counter
 from datetime import datetime, timedelta
-from distutils.command.clean import clean
 import json
 import os
 import re
