@@ -144,12 +144,4 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-.cache
-*_backup.db
-posts_info.json
-inverted_index.json
-.DS_Store
 .vscode
-tests/tmp/*.json
-tests/tmp/*.db
-tests/tmp/*.js

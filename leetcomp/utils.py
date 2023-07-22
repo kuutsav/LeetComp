@@ -1,31 +1,21 @@
-from contextlib import contextmanager
-import datetime
-
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
-from leetcomp.models import Base
+import json
 
 
-# sqlite engine
-engine = create_engine("sqlite:///posts.db")
-Session = sessionmaker()
-Session.configure(bind=engine)
-Base.metadata.create_all(engine)
+def print_warning(message: str) -> None:
+    print(f"\033[93m{message}\033[0m")
 
 
-def get_today() -> str:
-    return datetime.datetime.now().strftime("%Y_%m_%d")
+def print_info(message: str) -> None:
+    print(f"\033[92m{message}\033[0m")
 
 
-@contextmanager
-def session_scope() -> sessionmaker:
-    session = Session()
-    try:
-        yield session
-        session.commit()
-    except:  # noqa: # type: ignore
-        session.rollback()
-        raise
-    finally:
-        session.close()
+def dump_jsonl(data: list[dict], fname: str) -> None:
+    with open(fname, "a") as f:
+        for d in data:
+            f.write(json.dumps(d) + "\n")
+
+
+def load_jsonl(fname: str) -> list[dict]:
+    with open(fname, "r") as f:
+        data = [json.loads(line) for line in f.readlines() if line.strip()]
+    return data
