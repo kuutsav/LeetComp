@@ -14,7 +14,7 @@ mypy = "^0.931"
 pytest-cov = "^3.0.0"
 
 [tool.poetry.dev-dependencies]
-pytest = "^7.0"
+pytest = "^7.2"
 black = {version = "^22.1", allow-prereleases = true}
 
 [build-system]
