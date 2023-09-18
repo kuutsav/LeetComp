@@ -673,7 +673,7 @@ function _SearchBaseSalaryFilter(data_indexes) {
 
 
         
-        for (i = 0; i < data.length; i++) {
+        for (i = 0; i < data_indexes.length; i++) {
             index = data_indexes[i]
             baseSalary = parseFloat(allData[index][keyMap["cleanSalary"]]);
             if (baseSalary >= minBase && baseSalary <= maxBase) {
@@ -708,7 +708,7 @@ function _SearchTotalSalaryFilter(data_indexes) {
         minTotal = minTotal * 100000; 
 
         
-        for (i = 0; i < data.length; i++) {
+        for (i = 0; i < data_indexes.length; i++) {
             index = data_indexes[i]
             totalSalary = parseFloat(allData[index][keyMap["cleanSalaryTotal"]]);
             if (totalSalary >= minTotal && totalSalary <= maxTotal) {
