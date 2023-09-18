@@ -89,6 +89,12 @@
                 <input type="search" class="form-control-sm rounded" placeholder="#" aria-label="maxYoe"
                     aria-describedby="max-yoe" id="maxYoe" onkeyup="SearchYoeFilter()" /> YOE
             </div>
+            <!-- Date filter -->
+            <div class="col-auto mr-auto">
+                <input type="data-start-date" class="form-control-sm rounded" placeholder="YYYY-MM-DD" aria-label="data-start-date"
+                    aria-describedby="data-start-date-addon" id="data-start-date" onkeyup="SearchYoeFilter()" />
+            </div>
+
         </div>
         <br>
         <!-- Data Table -->
@@ -100,12 +106,15 @@
                     </th>
                     </th>
                     <th scope="col" style="width:13%">Yoe<span class="sortButton" onclick="sortBySalary(this)"
-                            id="cleanYoe">&nbsp;▾</span></th>
+                            id="cleanYoe">&nbsp;▾</span>
+                    </th>
                     <th scope="col" style="width:22%">Salary<span class="sortButton" onclick="sortBySalary(this)"
-                            id="cleanSalaryTotal">&nbsp;▾</span><span class="sortButton" onclick="sortBySalary(this)"
-                            id="cleanSalary">&nbsp;▾</span></th>
+                            id="cleanSalaryTotal">&nbsp;T▾</span><span class="sortButton" onclick="sortBySalary(this)"
+                            id="cleanSalary">&nbsp;▾</span>
+                    </th>
                     <th scope="col" style="width:15%">Date<span class="sortButton" onclick="sortBySalary(this)"
-                            id="date">&nbsp;▾</span></th>
+                            id="date">&nbsp;▾</span>
+                    </th>
                     <th scope="col" style="width:10%">Votes<span class="sortButton" onclick="sortBySalary(this)"
                             id="voteCount">&nbsp;▾</span>
                         <p class="secondaryText secondaryTheadText">Views</p>

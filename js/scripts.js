@@ -609,6 +609,28 @@ function _SearchYoeFilter() {
             }
         }
     }
+
+    // Filter for year - "yyyy-MM-dd"
+    if (document.getElementById("data-start-date").value.length == 10) {
+        const startDateStr = document.getElementById("data-start-date").value;
+        try {
+            const startDate = new Date(Date.parse(startDateStr));
+
+            for (i = 0; i < allData.length; i++) {
+                const dateString = allData[i][keyMap["date"]];
+                const date = new Date(Date.parse(dateString));
+
+                if (date > startDate) {
+                    window.data.push(allData[i]);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to parse startDate: ' + startDate, error);
+        }
+        
+    } 
+
+    // filter for YOE
     tempData = [];
     for (i = 0; i < window.data.length; i++) {
         yoe = parseFloat(window.data[i][keyMap["cleanYoe"]]);
