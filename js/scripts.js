@@ -663,8 +663,8 @@ function _SearchBaseSalaryFilter() {
 
 
     for (i = 0; i < window.data.length; i++) {
-        yoe = parseFloat(window.data[i][keyMap["cleanSalary"]]);
-        if (yoe >= minBase && yoe <= maxBase) {
+        baseSalary = parseFloat(window.data[i][keyMap["cleanSalary"]]);
+        if (baseSalary >= minBase && baseSalary <= maxBase) {
             window.data.push(window.data[i]);
         }
     }
@@ -688,8 +688,8 @@ function _SearchTotalSalaryFilter() {
     minTotal = minTotal * 100000; 
 
     for (i = 0; i < window.data.length; i++) {
-        yoe = parseFloat(window.data[i][keyMap["cleanSalaryTotal"]]);
-        if (yoe >= minTotal && yoe <= maxTotal) {
+        totalSalary = parseFloat(window.data[i][keyMap["cleanSalaryTotal"]]);
+        if (totalSalary >= minTotal && totalSalary <= maxTotal) {
             window.data.push(window.data[i]);
         }
     }
