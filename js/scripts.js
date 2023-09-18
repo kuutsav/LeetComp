@@ -646,7 +646,7 @@ function _FilterDataFromStartDate(data_indexes) {
                 }
             }
         } catch (error) {
-            console.error('Failed to parse startDate: ' + startDate, error);
+            console.error('Failed to parse startDate: ' + startDateStr, error);
             return data_indexes;
         }
     }
