@@ -96,6 +96,30 @@
             </div>
 
         </div>
+
+        <div class="row">
+            <!-- Min - Max Base Salary filter -->
+            <div class="col-auto mr-auto">
+                <input type="search" class="form-control-sm rounded" placeholder="X = X lac" aria-label="minBase"
+                    aria-describedby="min-base" id="minBase" onkeyup="SearchBaseSalaryFilter()" /> to
+                <input type="search" class="form-control-sm rounded" placeholder="X = X lac" aria-label="maxBase"
+                    aria-describedby="max-base" id="maxBase" onkeyup="SearchBaseSalaryFilter()" /> Base
+            </div>
+            <!-- Min - Max Total Salary filter -->
+            <div class="col-auto mr-auto">
+                <input type="search" class="form-control-sm rounded" placeholder="X = X lac" aria-label="minTotal"
+                    aria-describedby="min-Total" id="minTotal" onkeyup="SearchTotalSalaryFilter()" /> to
+                <input type="search" class="form-control-sm rounded" placeholder="X = X lac" aria-label="maxTotal"
+                    aria-describedby="max-Total" id="maxTotal" onkeyup="SearchTotalSalaryFilter()" /> Total
+            </div>
+            <!-- Min - Max Date filter
+            <div class="col-auto mr-auto">
+                <input type="search" class="form-control-sm rounded" placeholder="total (12 = 12 lac)" aria-label="minDate"
+                    aria-describedby="min-Total" id="minTotal" onkeyup="SearchTotalSalaryFilter()" /> to
+                <input type="search" class="form-control-sm rounded" placeholder="total (12 = 12 lac)" aria-label="maxDate"
+                    aria-describedby="max-Total" id="maxTotal" onkeyup="SearchTotalSalaryFilter()" /> Total
+            </div> -->
+        </div>
         <br>
         <!-- Data Table -->
         <table id="postInfo" class="table table-hover">

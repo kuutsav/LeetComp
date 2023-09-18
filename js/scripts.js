@@ -630,6 +630,9 @@ function _SearchYoeFilter() {
         
     } 
 
+    _SearchBaseSalaryFilter()
+    _SearchTotalSalaryFilter()
+
     // filter for YOE
     tempData = [];
     for (i = 0; i < window.data.length; i++) {
@@ -640,6 +643,56 @@ function _SearchYoeFilter() {
     }
     window.data = tempData;
     resetData();
+}
+
+function _SearchBaseSalaryFilter() {
+    minBase = document.getElementById("minBase").value;
+    maxBase = document.getElementById("maxBase").value;
+    if (minBase.length == 0) {
+        minBase = 0;
+    } else {
+        minBase = parseFloat(minBase)
+    }
+    if (maxBase.length == 0) {
+        maxBase = 1200;// 1200 lacs
+    } else {
+        maxBase = parseFloat(maxBase)
+    }
+    minBase = maxBase * 100000; 
+    minBase = minBase * 100000; 
+
+
+    for (i = 0; i < window.data.length; i++) {
+        yoe = parseFloat(window.data[i][keyMap["cleanSalary"]]);
+        if (yoe >= minBase && yoe <= maxBase) {
+            window.data.push(window.data[i]);
+        }
+    }
+    
+}
+
+function _SearchTotalSalaryFilter() {
+    minTotal = document.getElementById("minTotal").value;
+    maxTotal = document.getElementById("maxTotal").value;
+    if (minTotal.length == 0) {
+        minTotal = 0;
+    } else {
+        minTotal = parseFloat(minTotal)
+    }
+    if (maxTotal.length == 0) {
+        maxTotal = 1200;// 1200 lacs
+    } else {
+        maxTotal = parseFloat(maxTotal)
+    }
+    maxTotal = maxTotal * 100000; 
+    minTotal = minTotal * 100000; 
+
+    for (i = 0; i < window.data.length; i++) {
+        yoe = parseFloat(window.data[i][keyMap["cleanSalaryTotal"]]);
+        if (yoe >= minTotal && yoe <= maxTotal) {
+            window.data.push(window.data[i]);
+        }
+    }
 }
 
 const SearchYoeFilter = debounce((e) => _SearchYoeFilter());
