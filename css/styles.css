@@ -97,6 +97,14 @@ input[type="search"] {
   text-align: center;
 }
 
+#filteredCompaniesTitle,
+#filteredCompaniesTitle {
+  font-size: x-small;
+  margin-top: 10;
+  margin-bottom: -10;
+  text-align: center;
+}
+
 .sortButton {
   cursor: pointer;
 }

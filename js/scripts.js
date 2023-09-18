@@ -732,3 +732,31 @@ function _SearchTotalSalaryFilter(data_indexes) {
 }
 
 const SearchYoeFilter = debounce((e) => _SearchYoeFilter());
+
+function showCompaniesInFilteredData() {
+    const frequencyMap = {};
+    for (i = 0; i < window.data.length; i++) {
+        companyName = window.data[i][keyMap["cleanCompany"]]
+        if (frequencyMap[companyName]) {
+            frequencyMap[companyName]++;
+        } else {
+            frequencyMap[companyName] = 1;
+        }
+    }
+
+    // const sortedKeys = Object.entries(frequencyMap).sort((a, b) => b[1] - a[1]).map(entry => entry[0]);
+    const sortedKeys = Object.entries(frequencyMap).sort((a, b) => {
+        // Compare the frequencies
+        if (b[1] !== a[1]) {
+            return b[1] - a[1];
+        }
+    
+        // Frequencies are equal, compare the lengths of the keys
+        return a[0].length - b[0].length;
+    }).map(entry => entry[0]);
+    
+
+    const rows = sortedKeys.map(key => `<div class="col" style="border: 1px solid red;">${key}(${frequencyMap[key]})</div>`).join('');
+    document.getElementById("filteredCompanies").innerHTML = rows;
+
+}

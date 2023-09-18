@@ -65,6 +65,15 @@
         <hr>
         <div class="row" id="mostOffers30"></div>
         <hr>
+        <div class="col-auto mr-auto">
+            <div class="btn-group btn-group-toggle">
+                <label class="btn btn-secondary active" onclick="showCompaniesInFilteredData()" id="filteredCompaniesTitle">📈 Companies in filtered Data</label>
+            </div>
+        </div>
+        <hr>
+        <div class="row" id="filteredCompanies"></div>
+        
+        <hr>
         <br>
         <!-- Data Table controls -->
         <div class="row">
@@ -133,9 +142,9 @@
                     <th scope="col" style="width:13%">Yoe<span class="sortButton" onclick="sortBySalary(this)"
                             id="cleanYoe">&nbsp;▾</span>
                     </th>
-                    <th scope="col" style="width:22%">Salary<span class="sortButton" onclick="sortBySalary(this)"
-                            id="cleanSalaryTotal">&nbsp;T▾</span><span class="sortButton" onclick="sortBySalary(this)"
-                            id="cleanSalary">&nbsp;▾</span>
+                    <th scope="col" style="width:22%">Salary
+                        <span class="sortButton" onclick="sortBySalary(this)" id="cleanSalaryTotal">&nbsp;T▾</span>
+                        <span class="sortButton" onclick="sortBySalary(this)" id="cleanSalary">&nbsp;B▾</span>
                     </th>
                     <th scope="col" style="width:15%">Date<span class="sortButton" onclick="sortBySalary(this)"
                             id="date">&nbsp;▾</span>
