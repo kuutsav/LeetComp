@@ -1,3 +1,50 @@
+name: Automatic Data Update
+
+on:
+  schedule:
+    - cron: "0 0 */2 * *"
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    strategy:
+      matrix:
+        python-version: ["3.9"]
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "${{ matrix.python-version }}"
+
+      - name: Install poetry
+        run: pip install poetry
+
+      - name: Setup project
+        run: poetry install
+
+      - name: Run update script
+        run: |
+          poetry shell
+          export PYTHONPATH=.
+          python update.py
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git checkout -b update-$(date +'%Y%m%d')
+          git add .
+          git commit -m "Update data"
+          git push origin HEAD
+
 # name: Automatic Data Update
 
 # on:
