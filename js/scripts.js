@@ -590,70 +590,71 @@ function _SearchYoeFilter() {
         maxYoe = parseFloat(maxYoe)
     }
 
-    window.data = [];
+    window.data_indexes = [];
     if (document.getElementById("search").value.length > 2) {
         search(document.getElementById("search"));
     } else {
         if (document.getElementById("fullTimeButton").classList.contains("active")) {
             for (i = 0; i < allData.length; i++) {
                 if (allData[i][keyMap["yrOrPm"]] == "yearly") {
-                    window.data.push(allData[i]);
+                    window.data_indexes.push(i);
 
                 }
             }
         } else if (document.getElementById("internshipButton").classList.contains("active")) {
             for (i = 0; i < allData.length; i++) {
                 if (allData[i][keyMap["yrOrPm"]] == "monthly") {
-                    window.data.push(allData[i]);
+                    window.data_indexes.push(i);
                 }
             }
         }
     }
 
     // Filter for year - "yyyy-MM-dd"
-    const yearData = _FilterDataFromStartDate(window.data)
-    const base_sal_filtered_data = _SearchBaseSalaryFilter(yearData)
-    const total__sal_filtered_data = _SearchTotalSalaryFilter(base_sal_filtered_data)
+    const year_data_indexes = _FilterDataFromStartDate(window.data_indexes)
+    const base_sal_filtered_data_indexes = _SearchBaseSalaryFilter(year_data_indexes)
+    const total_sal_filtered_data_indexes = _SearchTotalSalaryFilter(base_sal_filtered_data_indexes)
 
     // filter for YOE
     tempData = [];
-    for (i = 0; i < total__sal_filtered_data.length; i++) {
-        yoe = parseFloat(total__sal_filtered_data[i][keyMap["cleanYoe"]]);
+    for (i = 0; i < total_sal_filtered_data_indexes.length; i++) {
+        index = total_sal_filtered_data_indexes[i]
+        yoe = parseFloat(allData[index][keyMap["cleanYoe"]]);
         if (yoe >= minYoe && yoe <= maxYoe) {
-            tempData.push(total__sal_filtered_data[i]);
+            tempData.push(allData[index]);
         }
     }
     window.data = tempData;
     resetData();
 }
 
-function _FilterDataFromStartDate(data) {
+function _FilterDataFromStartDate(data_indexes) {
     // Filter for year - "yyyy-MM-dd"
-    const filtered_data = []
+    const filtered_data_indexes = []
     if (document.getElementById("data-start-date").value.length == 10) {
         const startDateStr = document.getElementById("data-start-date").value;
         try {
             const startDate = new Date(Date.parse(startDateStr));
 
-            for (i = 0; i < data.length; i++) {
-                const dateString = data[i][keyMap["date"]];
+            for (i = 0; i < data_indexes.length; i++) {
+                const index = data_indexes[i]
+                const dateString = allData[index][keyMap["date"]];
                 const date = new Date(Date.parse(dateString));
 
                 if (date > startDate) {
-                    filtered_data.push(data[i]);
+                    filtered_data.push(index);
                 }
             }
         } catch (error) {
             console.error('Failed to parse startDate: ' + startDate, error);
-            return data;
+            return data_indexes;
         }
-        
     }
-    return filtered_data;
+    return filtered_data_indexes;
 }
 
-function _SearchBaseSalaryFilter(data) {
-    const filtered_data = []
+function _SearchBaseSalaryFilter(data_indexes) {
+    const filtered_data_indexes = []
     try {
         minBase = document.getElementById("minBase").value;
         maxBase = document.getElementById("maxBase").value;
@@ -673,22 +674,23 @@ function _SearchBaseSalaryFilter(data) {
 
         
         for (i = 0; i < data.length; i++) {
-            baseSalary = parseFloat(data[i][keyMap["cleanSalary"]]);
+            index = data_indexes[i]
+            baseSalary = parseFloat(allData[index][keyMap["cleanSalary"]]);
             if (baseSalary >= minBase && baseSalary <= maxBase) {
-                filtered_data.push(data[i]);
+                filtered_data_indexes.push(index);
             }
         }
 
-        return filtered_data;
+        return filtered_data_indexes;
     } catch (error) {
         console.error('Failed _SearchBaseSalaryFilter: ', error);
-        return data;
+        return data_indexes;
     }
 
 }
 
-function _SearchTotalSalaryFilter(data) {
-    const filtered_data = []
+function _SearchTotalSalaryFilter(data_indexes) {
+    const filtered_data_indexes = []
     try {
         minTotal = document.getElementById("minTotal").value;
         maxTotal = document.getElementById("maxTotal").value;
@@ -707,16 +709,17 @@ function _SearchTotalSalaryFilter(data) {
 
         
         for (i = 0; i < data.length; i++) {
-            totalSalary = parseFloat(data[i][keyMap["cleanSalaryTotal"]]);
+            index = data_indexes[i]
+            totalSalary = parseFloat(allData[index][keyMap["cleanSalaryTotal"]]);
             if (totalSalary >= minTotal && totalSalary <= maxTotal) {
-                filtered_data.push(data[i]);
+                filtered_data_indexes.push(index);
             }
         }
 
-        return filtered_data
+        return filtered_data_indexes
     } catch (error) {
-        console.error('Failed _SearchBaseSalaryFilter: ', error);
-        return data;
+        console.error('Failed _SearchTotalSalaryFilter: ', error);
+        return data_indexes;
     }
 }
 
