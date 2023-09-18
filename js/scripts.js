@@ -543,17 +543,17 @@ function debounce(func, timeout = 300) {
 }
 
 function filterSearchIndexes(ixs) {
+    
     if (document.getElementById("fullTimeButton").classList.contains("active")) {
         for (i = 0; i < ixs.length; i++) {
             if (allData[ixs[i]][keyMap["yrOrPm"]] == "yearly") {
-                window.data.push(allData[ixs[i]]);
-
+                window.data_indexes.push(ixs[i]);
             }
         }
     } else if (document.getElementById("internshipButton").classList.contains("active")) {
         for (i = 0; i < ixs.length; i++) {
             if (allData[ixs[i]][keyMap["yrOrPm"]] == "monthly") {
-                window.data.push(allData[ixs[i]]);
+                window.data_indexes.push(ixs[i]);
             }
         }
     }
@@ -609,6 +609,8 @@ function _SearchYoeFilter() {
             }
         }
     }
+    console.log("window.data_indexes")
+    console.log(window.data_indexes)
 
     // Filter for year - "yyyy-MM-dd"
     const year_data_indexes = _FilterDataFromStartDate(window.data_indexes)
@@ -630,10 +632,11 @@ function _SearchYoeFilter() {
 
 function _FilterDataFromStartDate(data_indexes) {
     // Filter for year - "yyyy-MM-dd"
-    const filtered_data_indexes = []
-    if (document.getElementById("data-start-date").value.length == 10) {
-        const startDateStr = document.getElementById("data-start-date").value;
-        try {
+    let filtered_data_indexes = []
+    try {
+        if (document.getElementById("data-start-date").value.length == 10) {
+            const startDateStr = document.getElementById("data-start-date").value;
+            
             const startDate = new Date(Date.parse(startDateStr));
 
             for (i = 0; i < data_indexes.length; i++) {
@@ -642,14 +645,18 @@ function _FilterDataFromStartDate(data_indexes) {
                 const date = new Date(Date.parse(dateString));
 
                 if (date > startDate) {
-                    filtered_data.push(index);
+                    filtered_data_indexes.push(index);
                 }
             }
-        } catch (error) {
-            console.error('Failed to parse startDate: ' + startDateStr, error);
-            return data_indexes;
+
+        } else {
+            filtered_data_indexes = data_indexes;
         }
+    } catch (error) {
+        console.error('Failed to parse startDate', error);
+        return data_indexes;
     }
+    console.log(filtered_data_indexes)
     return filtered_data_indexes;
 }
 
@@ -668,7 +675,7 @@ function _SearchBaseSalaryFilter(data_indexes) {
         } else {
             maxBase = parseFloat(maxBase)
         }
-        minBase = maxBase * 100000; 
+        maxBase = maxBase * 100000; 
         minBase = minBase * 100000; 
 
 
@@ -680,7 +687,7 @@ function _SearchBaseSalaryFilter(data_indexes) {
                 filtered_data_indexes.push(index);
             }
         }
-
+        console.log(filtered_data_indexes)
         return filtered_data_indexes;
     } catch (error) {
         console.error('Failed _SearchBaseSalaryFilter: ', error);
@@ -716,6 +723,7 @@ function _SearchTotalSalaryFilter(data_indexes) {
             }
         }
 
+        console.log(filtered_data_indexes)
         return filtered_data_indexes
     } catch (error) {
         console.error('Failed _SearchTotalSalaryFilter: ', error);
