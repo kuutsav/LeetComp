@@ -32,9 +32,7 @@ jobs:
 
       - name: Run update script
         run: |
-          poetry shell
-          export PYTHONPATH=.
-          python update.py
+          poetry run python update.py
 
       - name: Commit and push changes
         run: |
