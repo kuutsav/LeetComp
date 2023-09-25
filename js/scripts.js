@@ -456,7 +456,7 @@ function updatePostsTableContent(startIndex, endIndex) {
         myHtmlContent += "<td>" + data[i][keyMap["date"]] + "</td>";
         myHtmlContent += "<td>" + data[i][keyMap["voteCount"]] + "<p class='secondaryText'>(" +
             data[i][keyMap["viewCount"]] + ")</p></td>";
-        myHtmlContent += "<td><a class='postHref' href=https://leetcode.com/discuss/compensation/" + data[i][keyMap["id"]] + ">" +
+        myHtmlContent += "<td><a target='blank' class='postHref' href=https://leetcode.com/discuss/compensation/" + data[i][keyMap["id"]] + ">" +
             data[i][keyMap["id"]] + "</a></td></tr>";
     }
     tableTbodyRef.innerHTML = myHtmlContent;
