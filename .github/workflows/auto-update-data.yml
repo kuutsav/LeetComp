@@ -38,10 +38,10 @@ jobs:
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git checkout -b update-$(date +'%Y%m%d')
           git add .
-          git commit -m "Update data"
+          git commit -m "update-$(date +'%Y%m%d')"
           git push origin HEAD
+#         git checkout -b update-$(date +'%Y%m%d') # add before "git add ."
 
 # name: Automatic Data Update
 
