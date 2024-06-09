@@ -23,11 +23,10 @@ jobs:
         with:
           python-version: "${{ matrix.python-version }}"
       - name: "Install Poetry"
-        run: "python -m pip install poetry"
+        run: |
+          "python -m pip install poetry"
+          "poetry lock --no-update"
       - name: "Install dependencies"
         run: "python -m poetry install"
-      # Turning off linting checks till the black<>click issue is resolved
-      # - name: "Run linting checks"
-      #   run: "python -m poetry run pre-commit run -a"
       - name: "Run tests"
         run: "python -m poetry run pytest --cov=leetcomp"
