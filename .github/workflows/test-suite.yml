@@ -30,7 +30,9 @@ jobs:
           pip install poetry
           
       - name: Install dependencies
-        run: poetry install
+        run: |
+          poetry lock --no-update
+          poetry install
         
       - name: Run tests
         run: poetry run pytest --cov=leetcomp
