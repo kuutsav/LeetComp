@@ -1,3 +1,5 @@
+⚠️ This repo is no longer maintained, check out https://github.com/kuutsav/leetcode-compensation ⚠️
+
 # LeetComp
 
 ![example workflow](https://github.com/kuutsav/LeetComp/actions/workflows/test-suite.yml/badge.svg)
