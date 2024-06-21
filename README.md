@@ -67,11 +67,3 @@ Dropped 181/3923 records due to invalid pay
 -----------Building inverted index------------
 Keeping 1303/1303 tokens
 ```
-
-## Roadmap
-
-- Automate data refresh using github actions
-- Standardize `Company` and `Role` (for example "Amazon aws" -> "Amazon")
-- Index `Company` and `Role` separately (to enable searching for company and roles separately)
-- Improve page nav (links to more pages, last page, etc.)
-- Global data support (Depends on the traction this project gets from other countries)
