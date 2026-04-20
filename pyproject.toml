@@ -9,7 +9,7 @@ python = "^3.8"
 SQLAlchemy = "^1.4.31"
 requests = "^2.27.1"
 loguru = "^0.6.0"
-pre-commit = "^2.17.0"
+pre-commit = "^3.5.0"
 mypy = "^0.931"
 pytest-cov = "^3.0.0"
 
